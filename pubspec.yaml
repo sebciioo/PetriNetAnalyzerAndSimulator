@@ -36,6 +36,8 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
+  image_picker: ^1.1.2
+  flutter_riverpod: ^2.6.1
 
 dev_dependencies:
   flutter_test:
@@ -80,10 +82,6 @@ flutter:
     - family: 'htr'
       fonts:
         - asset: assets/fonts/Home_to_Rome_Free_Trial.ttf
-          weight: 500
-    - family: 'Inter'
-      fonts:
-        - asset: assets/fonts/Inter-Regular.ttf
           weight: 500
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic

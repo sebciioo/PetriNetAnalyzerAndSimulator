@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:petri_net_front/UI/screens/imagePickerScreen/imagePickerScreen.dart';
+import 'package:petri_net_front/UI/utils/responsive_constants.dart';
 
 class homeScreen extends StatelessWidget {
   const homeScreen({super.key});
+
+  void goToUploadFile(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (ctx) => const ImagePickerScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.sizeOf(context).width;
     var screenHeight = MediaQuery.sizeOf(context).height;
-    const kBreakpointSmall = 479.0;
-    const kBreakpointMedium = 767.0;
 
     return Scaffold(
       body: Center(
@@ -82,7 +88,7 @@ class homeScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () => goToUploadFile(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               Theme.of(context).colorScheme.secondary,

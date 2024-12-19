@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:json_theme/json_theme.dart';
 import 'package:petri_net_front/UI/screens/home/home.dart';
 
@@ -14,7 +15,7 @@ void main() async {
         validate: true,
       ) ??
       ThemeData();
-  runApp(MyApp(theme: theme));
+  runApp(ProviderScope(child: MyApp(theme: theme)));
 }
 
 class MyApp extends StatelessWidget {
