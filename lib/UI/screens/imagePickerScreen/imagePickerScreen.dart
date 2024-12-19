@@ -205,6 +205,25 @@ class ImagePickerScreen extends ConsumerWidget {
                   ),
                 ),
               )),
+              Align(
+                alignment: const AlignmentDirectional(1, 1),
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 20, 30),
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      ref.read(imageProvider.notifier).clearImage();
+                    },
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    elevation: 0,
+                    child: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: Colors.white,
+                      size: 25,
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
         ),
