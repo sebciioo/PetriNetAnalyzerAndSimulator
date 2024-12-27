@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:petri_net_front/UI/providers/ImageState.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/imageInput.dart';
+import 'package:petri_net_front/UI/screens/petriNetScreen/petriNetsScreen.dart';
 import 'package:petri_net_front/UI/utils/responsive_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
@@ -36,6 +37,12 @@ class ImagePickerScreen extends ConsumerWidget {
       }
 
       ref.read(imageProvider.notifier).setImage(File(pickedImage.path));
+    }
+
+    void goToPetriNetScreen(BuildContext context) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (ctx) => const PetriNetScreen()),
+      );
     }
 
     return Scaffold(
@@ -158,7 +165,9 @@ class ImagePickerScreen extends ConsumerWidget {
                                   : CustomElevatedButton(
                                       label: "Gotowe!",
                                       icon: Icons.check,
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        goToPetriNetScreen(context);
+                                      },
                                       backgroundColor: Theme.of(context)
                                           .colorScheme
                                           .secondary,
