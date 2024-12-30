@@ -14,7 +14,7 @@ class PetriNetPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint statePaint = Paint()
-      ..color = Colors.blue
+      ..color = Color(0xFF00bcd4)
       ..style = PaintingStyle.fill;
 
     final Paint transitionPaint = Paint()

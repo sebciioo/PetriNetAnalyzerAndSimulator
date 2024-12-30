@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/models/petriNet.dart';
+import 'package:petri_net_front/UI/screens/petriNetScreen/widget/featuresTile.dart';
+import 'package:petri_net_front/UI/screens/petriNetScreen/widget/managementOption.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/petriNetPainter.dart';
 import 'package:petri_net_front/UI/utils/responsive_constants.dart';
 
@@ -14,10 +17,14 @@ class PetriNetScreen extends StatefulWidget {
 
 class _PetriNetScreen extends State<PetriNetScreen> {
   final PetriNet petriNet = PetriNet();
+  bool? editingMode;
+  bool? simulationMode;
 
   @override
   void initState() {
     super.initState();
+    editingMode = false;
+    simulationMode = true;
     // Tworzenie przykładowej sieci Petriego
     final state1 = States(center: Offset(100, 200), label: 'S1', tokens: 101);
     final state2 = States(center: Offset(400, 200), label: 'S2', tokens: 3);
@@ -100,6 +107,20 @@ class _PetriNetScreen extends State<PetriNetScreen> {
     }
   }
 
+  void onTapEditingButton() {
+    setState(() {
+      editingMode = true;
+      simulationMode = false;
+    });
+  }
+
+  void onTapSimulationButton() {
+    setState(() {
+      editingMode = false;
+      simulationMode = true;
+    });
+  }
+
   List<Widget> _buildTransitionButtons() {
     return petriNet.transitions.map((transition) {
       final centerX = (transition.start.dx + transition.end.dx) / 2;
@@ -131,7 +152,7 @@ class _PetriNetScreen extends State<PetriNetScreen> {
         child: IconButton(
           icon: const Icon(Icons.play_circle_outline_sharp), // Ikona przycisku
           iconSize: 50, // Rozmiar ikony
-          color: Colors.blue, // Kolor ikony
+          color: Color(0xFF00bcd4), // Kolor ikony
           onPressed: () => activateTransition(transition), // Akcja kliknięcia
           splashRadius: 20, // Promień efektu kliknięcia
         ),
@@ -141,9 +162,50 @@ class _PetriNetScreen extends State<PetriNetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(editingMode);
+    print(simulationMode);
     return Scaffold(
-      appBar: AppBar(title: const Text('Sieć Petriego')),
-      backgroundColor: Colors.grey[300],
+      appBar: AppBar(
+        title: const Text('PetriMind',
+            style: TextStyle(
+              fontFamily: 'htr',
+              color: Colors.white, // Kolor tekstu
+              fontSize: 40,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.0,
+              shadows: [
+                Shadow(
+                  offset: Offset(1.5, 1.5),
+                  color: Colors.black,
+                ),
+                Shadow(
+                  offset: Offset(1.5, 1.5),
+                  color: Colors.black,
+                ),
+                Shadow(
+                  offset: Offset(1.5, 1.5),
+                  color: Colors.black,
+                ),
+                Shadow(
+                  offset: Offset(2, 1.5),
+                  color: Colors.black,
+                ),
+              ],
+            )),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            size: 25,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
+      backgroundColor: Colors.grey[200],
       body: Column(
         children: [
           Expanded(
@@ -156,28 +218,36 @@ class _PetriNetScreen extends State<PetriNetScreen> {
                   Container(
                     width: 2000,
                     height: 2000,
-                    color: Colors.grey[300],
+                    color: Colors.grey[200],
                     child: CustomPaint(
                       painter: PetriNetPainter(petriNet: petriNet),
                     ),
                   ),
-                  ..._buildTransitionButtons(),
+                  if (simulationMode == true) ..._buildTransitionButtons(),
                 ],
               ),
             ),
           ),
           Container(
-            decoration: const BoxDecoration(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Color(0xFFBBDEFB),
-                  Color(0xFFF5F5F5)
-                ], // Gradient od błękitu do białego
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primaryContainer,
+                ],
+                stops: const [0.0, 0.5],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10.0,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-            padding: const EdgeInsets.all(16.0),
             height: 150,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -185,26 +255,40 @@ class _PetriNetScreen extends State<PetriNetScreen> {
                 // Left section
                 Expanded(
                   flex: 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Cechy behawioralne:',
-                        style: TextStyle(
-                          color: Color(0xFF212121),
-                          fontWeight: FontWeight.bold,
-                        ),
+                  child: RawScrollbar(
+                    thumbColor: Colors.white,
+                    thumbVisibility: true,
+                    thickness: 5.0,
+                    radius: Radius.circular(8),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (simulationMode == true) ...[
+                            const FeaturesTile(
+                              title: "Cechy behawioralne",
+                              items: [
+                                "Analiza przepustowości",
+                                "Sprawdzenie blokowania",
+                                "Analiza miejsc nadmiarowych",
+                              ],
+                            ),
+                            const FeaturesTile(
+                              title: "Cechy strukturalne",
+                              items: [
+                                "Analiza ścieżek",
+                                "Analiza połączeń",
+                              ],
+                            ),
+                          ] else
+                            ManagementOption(petriNet: petriNet),
+                        ],
                       ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Cechy strukturalne:',
-                        style: TextStyle(
-                          color: Color(0xFF212121),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
+                ),
+                const SizedBox(
+                  width: 15,
                 ),
                 // Right section
                 Expanded(
@@ -216,50 +300,34 @@ class _PetriNetScreen extends State<PetriNetScreen> {
                       SizedBox(
                         width: double
                             .infinity, // Stretches the button horizontally
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color(0xFF64B5F6), // Light blue
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                          child: Text(
-                            "Tryb symulacji",
-                            style: TextStyle(
-                              fontSize: MediaQuery.sizeOf(context).width <
-                                      kBreakpointSmall
-                                  ? 13.0
-                                  : 20.0,
-                              color: Colors.white,
-                            ),
-                          ),
+                        child: CustomElevatedButton(
+                          label: "Tryb symulacji",
+                          onPressed: onTapSimulationButton,
+                          backgroundColor: simulationMode!
+                              ? Theme.of(context).colorScheme.secondary
+                              : Colors.white,
+                          textColor: simulationMode!
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.inverseSurface,
+                          fontMin: 15,
+                          fontMax: 20,
                         ),
                       ),
                       const SizedBox(height: 16), // Spacing between the buttons
                       SizedBox(
                         width: double
                             .infinity, // Stretches the button horizontally
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side: const BorderSide(
-                              color: Color(0xFF64B5F6),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                          ),
-                          child: Text(
-                            "Tryb edycji",
-                            style: TextStyle(
-                              fontSize: MediaQuery.sizeOf(context).width <
-                                      kBreakpointSmall
-                                  ? 13.0
-                                  : 20.0,
-                              color: const Color(
-                                  0xFF64B5F6), // Light blue for text
-                            ),
-                          ),
+                        child: CustomElevatedButton(
+                          label: "Tryb edycji",
+                          onPressed: onTapEditingButton,
+                          backgroundColor: editingMode!
+                              ? Theme.of(context).colorScheme.secondary
+                              : Colors.white,
+                          textColor: editingMode!
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.inverseSurface,
+                          fontMin: 15,
+                          fontMax: 20,
                         ),
                       ),
                     ],
