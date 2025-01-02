@@ -1,8 +1,19 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.1.1" // Wersja kompatybilna z Chaquopy
+    }
+}
+
 allprojects {
     repositories {
         google()
         mavenCentral()
     }
+
 }
 
 rootProject.buildDir = "../build"
