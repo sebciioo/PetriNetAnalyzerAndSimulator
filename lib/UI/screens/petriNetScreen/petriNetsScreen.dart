@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
-import 'package:petri_net_front/UI/screens/petriNetScreen/models/petriNet.dart';
+import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/featuresTile.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/managementOption.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/petriNetPainter.dart';
@@ -77,9 +77,9 @@ class _PetriNetScreen extends State<PetriNetScreen> {
     state3.incomingArcs.add(arc4);
 
     // Tworzenie sieci Petriego
-    petriNet.states.addAll([state1, state2, state3]);
-    petriNet.transitions.addAll([transition1, transition2]);
-    petriNet.arcs.addAll([arc1, arc2, arc3, arc4]);
+    //petriNet.states.addAll([state1, state2, state3]);
+    //petriNet.transitions.addAll([transition1, transition2]);
+    //petriNet.arcs.addAll([arc1, arc2, arc3, arc4]);
   }
 
   void activateTransition(Transition transition) {

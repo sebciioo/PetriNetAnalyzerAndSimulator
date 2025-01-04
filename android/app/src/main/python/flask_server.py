@@ -1,11 +1,28 @@
 from flask import Flask, request, jsonify
+import cv2
 import threading
+import os
+import sys
+
 
 app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello, Flask from Android!"
+    print("Testuje opencv")
+    print(f"Wersja Pythona: {sys.version}")
+    print(cv2.__version__)
+    files_dir = os.path.join(os.path.dirname(__file__), "data")
+    image_path = os.path.join(files_dir, "test.png")
+    print("Zraz wczytam obraz")
+    image = cv2.imread(image_path)
+    cv2.circle(image, (100, 100), 25, 255, thickness=-1)
+    print(f"Ścieżka do obrazu: {image_path}")
+    if image is None:
+        return "Nie znaleziono obrazu w folderze data/", 404
+    height, width, channels = image.shape
+    return f"Obraz załadowany: Wymiary {width}x{height}, Kanały: {channels}. OpenCV działa poprawnie"
+
 
 @app.route("/health")
 def health_check():

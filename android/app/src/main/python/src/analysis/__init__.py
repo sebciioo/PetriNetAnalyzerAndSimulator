@@ -1,0 +1,1 @@
+from .petriNetAnalyzer import PetriNetAnalyzer

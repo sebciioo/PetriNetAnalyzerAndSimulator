@@ -1,0 +1,1 @@
+from .imageProcessorApp import ImageProcessorApp

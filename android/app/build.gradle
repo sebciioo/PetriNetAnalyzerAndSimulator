@@ -59,16 +59,21 @@ flutter {
 
 chaquopy {
     defaultConfig {
-        version = "3.12" // Set Python version
+        version = "3.8" 
         pip {
             install("flask")
+            install("opencv-python-headless")
+            install("numpy")
+            install("pillow==7.0.0")
+            install("tensorflow~=2.1.0")
+            install("h5py==2.10.0")
             install("fastapi==0.95.2")  
             install("uvicorn")         
             install("pydantic==1.10.9") 
             install("waitress")
             install("greenlet>=1.0")
             install("itsdangerous>=2.2")
-            install("Werkzeug>=3.1")
+            install("Werkzeug>=3.0.6")
             install("click>=8.1.3")
         }
     }

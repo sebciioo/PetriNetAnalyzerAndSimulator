@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:petri_net_front/UI/screens/petriNetScreen/models/petriNet.dart';
+import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/StateTokenTile.dart';
 
 class ManagementOption extends StatefulWidget {

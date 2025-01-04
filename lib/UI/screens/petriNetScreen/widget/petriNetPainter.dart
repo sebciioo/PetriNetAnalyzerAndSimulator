@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:petri_net_front/UI/screens/petriNetScreen/models/petriNet.dart';
+import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:arrow_path/arrow_path.dart';
 
 class PetriNetPainter extends CustomPainter {

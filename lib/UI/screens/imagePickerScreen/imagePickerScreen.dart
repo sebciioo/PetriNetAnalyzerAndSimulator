@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:petri_net_front/UI/providers/ImageState.dart';
+import 'package:petri_net_front/state/providers/ImageState.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/imageInput.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/petriNetsScreen.dart';

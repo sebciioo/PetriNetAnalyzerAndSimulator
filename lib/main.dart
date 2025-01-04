@@ -5,8 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:json_theme/json_theme.dart';
 import 'package:petri_net_front/UI/screens/home/home.dart';
+import 'package:petri_net_front/backendServer/serverManager.dart';
 
 void main() async {
+  // Wczytanie motywu
   WidgetsFlutterBinding.ensureInitialized();
   final String themeStr =
       await rootBundle.loadString('assets/theme/theme.json');
@@ -22,7 +24,6 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final ThemeData theme;
-
   const MyApp({super.key, required this.theme});
 
   @override
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: theme,
-      home: const HomeScreen(),
+      home: HomeScreen(serverManager: ServerManager()),
     );
   }
 }

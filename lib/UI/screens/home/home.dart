@@ -1,156 +1,28 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'dart:ui';
-import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/imagePickerScreen.dart';
 import 'package:petri_net_front/UI/utils/responsive_constants.dart';
+import 'package:petri_net_front/backendServer/serverManager.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required this.serverManager});
 
+  final ServerManager serverManager;
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-Future<void> startPythonServer() async {
-  const platform = MethodChannel('chaquopy');
-  try {
-    final result = await platform.invokeMethod('start_server');
-    debugPrint('Serwer Flask został uruchomiony: $result');
-  } catch (e) {
-    debugPrint('Błąd uruchamiania serwera Flask: $e');
-  }
-}
-
-Future<void> testServerConnection() async {
-  try {
-    final response = await http.get(Uri.parse('http://10.0.2.16:5666'));
-    if (response.statusCode == 200) {
-      debugPrint('Połączenie z serwerem Flask działa: ${response.body}');
-    } else {
-      debugPrint('Błąd połączenia: ${response.statusCode}');
-    }
-  } catch (e) {
-    debugPrint('Nie można połączyć się z serwerem Flask: $e');
-  }
-}
-
-Future<void> testServerConnection2() async {
-  try {
-    final response = await http.get(Uri.parse('http://10.0.2.16:5666'));
-    if (response.statusCode == 200) {
-      debugPrint('Połączenie z serwerem Flask działa: ${response.body}');
-    } else {
-      debugPrint('Błąd połączenia: ${response.statusCode}');
-    }
-  } catch (e) {
-    debugPrint('Nie można połączyć się z serwerem Flask: $e');
-  }
-}
-
-Future<void> testPostRequest() async {
-  final url = Uri.parse('http://10.0.2.16:5666/test_post');
-  final headers = {'Content-Type': 'application/json'};
-  final body = json.encode({"name": "John Doe", "age": 25});
-
-  try {
-    final response = await http.post(url, headers: headers, body: body);
-
-    if (response.statusCode == 200) {
-      print('Odpowiedź serwera: ${response.body}');
-    } else {
-      print('Błąd: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Błąd podczas wysyłania żądania POST: $e');
-  }
-}
-
-/*
-Future<void> checkServerHealth() async {
-  int retryCount = 0; // Licznik prób połączenia
-  const int maxRetries = 5; // Maksymalna liczba prób
-
-  while (true) {
-    try {
-      final response = await http
-          .get(Uri.parse('http://10.0.2.2:5666/health'))
-          .timeout(
-              Duration(seconds: 2)); // Ustawienie limitu czasu na 2 sekundy
-
-      if (response.statusCode == 200) {
-        print('Serwer działa');
-        retryCount = 0; // Reset liczby prób, jeśli serwer odpowiada
-      } else {
-        print('Serwer nie odpowiada, kod odpowiedzi: ${response.statusCode}');
-      }
-    } on TimeoutException catch (_) {
-      print('Przekroczono czas oczekiwania na odpowiedź serwera.');
-      retryCount++;
-    } catch (e) {
-      print('Nie można połączyć się z serwerem: $e');
-      retryCount++;
-    }
-
-    // Sprawdzenie, czy serwer jest zawieszony
-    if (retryCount >= maxRetries) {
-      print('Serwer nie odpowiada przez $maxRetries kolejne próby.');
-      final isServerRunning = await _checkIfServerIsRunning();
-      if (isServerRunning) {
-        print('Serwer jest uruchomiony, ale nie odpowiada na żądania.');
-      } else {
-        print('Serwer jest wyłączony lub zawieszony.');
-      }
-      retryCount = 0; // Reset licznika prób
-    }
-
-    await Future.delayed(Duration(seconds: 2)); // Odczekaj przed kolejną próbą
-  }
-}
-
-Future<bool> _checkIfServerIsRunning() async {
-  try {
-    final response = await http
-        .get(Uri.parse('http://10.0.2.2:5666/health'))
-        .timeout(Duration(seconds: 2));
-    return response.statusCode == 200;
-  } on TimeoutException {
-    return false;
-  } catch (_) {
-    return false;
-  }
-}
-*/
-Future<void> checkServerHealth() async {
-  try {
-    final response = await http
-        .get(Uri.parse('http://10.0.2.16:5666/health'))
-        .timeout(Duration(seconds: 2));
-    if (response.statusCode == 200) {
-      print('Serwer działa: ${response.body}');
-    } else {
-      print('Serwer nie odpowiada: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Nie można połączyć się z serwerem: $e');
-  }
-}
-
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    widget.serverManager.initializeServer();
+  }
+
   void goToUploadFile(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (ctx) => const ImagePickerScreen()),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override
@@ -251,12 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Przycisk Zaloguj się
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () async {
-                          await startPythonServer();
-                          await checkServerHealth();
-                          await testServerConnection2();
-                          await testPostRequest();
-                        },
+                        onPressed: () async {},
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           side: BorderSide(
