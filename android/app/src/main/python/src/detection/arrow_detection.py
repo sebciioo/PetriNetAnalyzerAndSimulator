@@ -242,7 +242,6 @@ def detect_arrow_directions(arrows, image):
 
         start_intensity = np.sum(start_region)
         end_intensity = np.sum(end_region)
-
         if end_intensity > start_intensity:
             # END
             line_with_directions = [(start_x, start_y), (end_x, end_y), (start_x, start_y)]

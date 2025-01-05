@@ -63,7 +63,7 @@ class PetriNetPainter extends CustomPainter {
           // Rysowanie liczby tokenów
           textPainter.text = TextSpan(
             text: '${state.tokens}',
-            style: textStyle.copyWith(color: Colors.white, fontSize: 20),
+            style: textStyle.copyWith(color: Colors.white, fontSize: 50),
           );
           textPainter.layout();
           textPainter.paint(
@@ -110,14 +110,24 @@ class PetriNetPainter extends CustomPainter {
     }
 
     for (final state in petriNet.states) {
+      print(state);
+      for (final arc in state.incomingArcs) {
+        print("              $arc");
+      }
+    }
+
+    for (final state in petriNet.states) {
       // Rysowanie wychodzących łuków
       for (final arc in state.outgoingArcs) {
         // Punkt początkowy łuku na krawędzi stanu
+        /*
         final adjustedStart = _calculateEdgePoint(
           arc.start,
           arc.end,
           state.radius, // Promień stanu
         );
+        */
+        final adjustedStart = state.center;
 
         // Punkt końcowy łuku na krawędzi tranzycji
         final transition = petriNet.transitions.firstWhere(
@@ -146,11 +156,14 @@ class PetriNetPainter extends CustomPainter {
         final adjustedStart = Offset(centerX, centerY);
 
         // Punkt końcowy łuku na krawędzi stanu
+        /*
         final adjustedEnd = _calculateEdgePoint(
           arc.end,
           arc.start,
           state.radius, // Promień stanu
         );
+        */
+        final adjustedEnd = state.center;
 
         _drawArrow(canvas, arcPaint, adjustedStart, adjustedEnd, arc.label,
             textPainter, textStyle);

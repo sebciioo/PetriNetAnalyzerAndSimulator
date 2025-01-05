@@ -28,6 +28,19 @@ class PetriNet {
       'transitions': transitions.map((tran) => tran.toJson()).toList(),
     };
   }
+
+  @override
+  String toString() {
+    return '''
+PetriNet:
+  Arcs:
+    ${arcs.map((arc) => arc.toString()).join('\n    ')}
+  States:
+    ${states.map((state) => state.toString()).join('\n    ')}
+  Transitions:
+    ${transitions.map((tran) => tran.toString()).join('\n    ')}
+    ''';
+  }
 }
 
 class Arc {
@@ -68,6 +81,32 @@ class Arc {
       'arrow_position': arrowPosition,
     };
   }
+
+  @override
+  String toString() {
+    return 'Arc(start: ${start.dx}, ${start.dy}, end: ${end.dx}, ${end.dy}, label: $label, arrowPosition: $arrowPosition)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true; // Jeśli to ten sam obiekt w pamięci
+    if (other is! Arc) return false; // Jeśli typ jest inny, nie są równe
+
+    return start == other.start &&
+        end == other.end &&
+        label == other.label &&
+        arrowPosition == other.arrowPosition;
+  }
+
+  // Nadpisanie hashCode
+  @override
+  int get hashCode => Object.hash(
+        start,
+        end,
+        label,
+        arrowPosition,
+      );
 }
 
 class States {
@@ -120,6 +159,15 @@ class States {
       'outgoing_arcs': outgoingArcs.map((arc) => arc.toJson()).toList(),
     };
   }
+
+  @override
+  String toString() {
+    return '''
+State(center: ${center.dx}, ${center.dy}, radius: $radius, label: $label, tokens: $tokens,
+  incomingArcs: ${incomingArcs.map((arc) => arc.toString()).join(', ')},
+  outgoingArcs: ${outgoingArcs.map((arc) => arc.toString()).join(', ')});
+''';
+  }
 }
 
 class Transition {
@@ -170,5 +218,14 @@ class Transition {
       'incoming_arcs': incomingArcs.map((arc) => arc.toJson()).toList(),
       'outgoing_arcs': outgoingArcs.map((arc) => arc.toJson()).toList(),
     };
+  }
+
+  @override
+  String toString() {
+    return '''
+Transition(start: ${start.dx}, ${start.dy}, end: ${end.dx}, ${end.dy}, label: $label,
+  incomingArcs: ${incomingArcs.map((arc) => arc.toString()).join(', ')},
+  outgoingArcs: ${outgoingArcs.map((arc) => arc.toString()).join(', ')});
+''';
   }
 }

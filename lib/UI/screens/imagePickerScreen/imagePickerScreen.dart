@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:petri_net_front/backendServer/serverManager.dart';
+import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/state/providers/ImageState.dart';
+import 'package:petri_net_front/state/cubits/petriNetCubite.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/imageInput.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/petriNetsScreen.dart';
-import 'package:petri_net_front/UI/utils/responsive_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class ImagePickerScreen extends ConsumerWidget {
-  const ImagePickerScreen({super.key});
+  const ImagePickerScreen({super.key, required this.serverManager});
+  final ServerManager serverManager;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final imageState = ref.watch(imageProvider);
+    final petriNetState = ref.watch(petriNetProvider);
 
     void _takePicture() async {
       final imagePicker = ImagePicker();
@@ -39,10 +43,23 @@ class ImagePickerScreen extends ConsumerWidget {
       ref.read(imageProvider.notifier).setImage(File(pickedImage.path));
     }
 
+    void _setPetriNetToProvider() async {
+      final PetriNet? jsonResponse =
+          await serverManager.sendImageFromPhoneToServer(imageState!);
+      ref.read(petriNetProvider.notifier).setPetriNet(jsonResponse!);
+      //print(jsonResponse.states.toString());
+      //print(jsonResponse.transitions.toString());
+    }
+
     void goToPetriNetScreen(BuildContext context) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (ctx) => const PetriNetScreen()),
-      );
+      if (petriNetState != null) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (ctx) => PetriNetScreen(
+                    petriNets2: petriNetState,
+                  )),
+        );
+      }
     }
 
     return Scaffold(
@@ -166,6 +183,7 @@ class ImagePickerScreen extends ConsumerWidget {
                                       label: "Gotowe!",
                                       icon: Icons.check,
                                       onPressed: () {
+                                        _setPetriNetToProvider();
                                         goToPetriNetScreen(context);
                                       },
                                       backgroundColor: Theme.of(context)

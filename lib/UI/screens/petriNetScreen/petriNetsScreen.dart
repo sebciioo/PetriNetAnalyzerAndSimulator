@@ -5,9 +5,11 @@ import 'package:petri_net_front/UI/screens/petriNetScreen/widget/featuresTile.da
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/managementOption.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/petriNetPainter.dart';
 import 'package:petri_net_front/UI/utils/responsive_constants.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PetriNetScreen extends StatefulWidget {
-  const PetriNetScreen({super.key});
+  const PetriNetScreen({super.key, required this.petriNets2});
+  final PetriNet petriNets2;
 
   @override
   State<StatefulWidget> createState() {
@@ -139,11 +141,7 @@ class _PetriNetScreen extends State<PetriNetScreen> {
         left = centerX - 5;
       }
 
-      // Sprawdzanie, czy tranzycja jest aktywna
-      final isActive = transition.incomingArcs.every((arc) {
-        final state = petriNet.states.firstWhere((s) => s.center == arc.start);
-        return state.tokens >= 1;
-      });
+      const isActive = true;
 
       if (!isActive) return const SizedBox.shrink();
       return Positioned(
@@ -162,8 +160,6 @@ class _PetriNetScreen extends State<PetriNetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(editingMode);
-    print(simulationMode);
     return Scaffold(
       appBar: AppBar(
         title: const Text('PetriMind',
@@ -220,7 +216,7 @@ class _PetriNetScreen extends State<PetriNetScreen> {
                     height: 2000,
                     color: Colors.grey[200],
                     child: CustomPaint(
-                      painter: PetriNetPainter(petriNet: petriNet),
+                      painter: PetriNetPainter(petriNet: widget.petriNets2),
                     ),
                   ),
                   if (simulationMode == true) ..._buildTransitionButtons(),

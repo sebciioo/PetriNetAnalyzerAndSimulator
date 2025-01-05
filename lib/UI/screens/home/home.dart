@@ -21,7 +21,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void goToUploadFile(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (ctx) => const ImagePickerScreen()),
+      MaterialPageRoute(
+          builder: (ctx) => ImagePickerScreen(
+                serverManager: widget.serverManager,
+              )),
     );
   }
 

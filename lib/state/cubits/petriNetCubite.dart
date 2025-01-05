@@ -1,27 +1,19 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/repositories/petriNetRepository.dart';
 import '../../data/models/petriNet.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PetriNetCubit extends Cubit<PetriNet?> {
-  final PetriNetRepository repository;
+class PetriNetNotifier extends StateNotifier<PetriNet?> {
+  PetriNetNotifier() : super(null);
 
-  PetriNetCubit(this.repository) : super(null);
-
-  void loadPetriNet() async {
-    try {
-      final petriNet = await repository.fetchPetriNet();
-      emit(petriNet);
-    } catch (e) {
-      emit(null); //
-    }
-  }
-
-  void updatePetriNet(PetriNet petriNet) async {
-    try {
-      await repository.sendPetriNet(petriNet);
-      emit(petriNet);
-    } catch (e) {
-      emit(state);
-    }
+  void setPetriNet(PetriNet petriNetResponse) {
+    state = PetriNet(
+      arcs: petriNetResponse.arcs,
+      states: petriNetResponse.states,
+      transitions: petriNetResponse.transitions,
+    );
   }
 }
+
+final petriNetProvider =
+    StateNotifierProvider<PetriNetNotifier, PetriNet?>((ref) {
+  return PetriNetNotifier();
+});

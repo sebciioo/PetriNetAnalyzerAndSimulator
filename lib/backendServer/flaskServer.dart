@@ -1,7 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:http_parser/http_parser.dart';
+import '../../data/models/petriNet.dart';
 import 'dart:async';
+import 'dart:io';
 import 'dart:convert';
 
 class FlaskServer {
@@ -81,6 +84,35 @@ class FlaskServer {
       }
     } catch (e) {
       print('Błąd połączenia: $e');
+    }
+  }
+
+  Future<PetriNet?> sendImageToServer(File imageFile) async {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('http://10.0.2.16:5666/process'),
+    );
+    request.files.add(await http.MultipartFile.fromPath(
+      'image',
+      imageFile.path,
+      contentType: MediaType('image', 'jpeg'),
+    ));
+
+    try {
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        final jsonResponse = jsonDecode(responseBody);
+        print('Upload successful. Server response: $jsonResponse');
+        return PetriNet.fromJson(jsonResponse);
+      } else {
+        print('Upload failed with status: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Błąd podczas wysyłania obrazu: $e');
+      return null;
     }
   }
 }
