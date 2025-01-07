@@ -11,6 +11,16 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
       transitions: petriNetResponse.transitions,
     );
   }
+
+  void updateState() {
+    if (state != null) {
+      state = PetriNet(
+        arcs: List.from(state!.arcs),
+        states: List.from(state!.states),
+        transitions: List.from(state!.transitions),
+      );
+    }
+  }
 }
 
 final petriNetProvider =

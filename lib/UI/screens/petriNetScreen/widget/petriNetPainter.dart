@@ -6,8 +6,9 @@ import 'package:arrow_path/arrow_path.dart';
 
 class PetriNetPainter extends CustomPainter {
   final PetriNet petriNet;
-  final double transitionHeight = 60.0; // Stała wysokość tranzycji
+  final double transitionHeight = 70.0; // Stała wysokość tranzycji
   final double transitionWidth = 5.0; // Szerokość tranzycji
+  final double constStateRadius = 40;
 
   PetriNetPainter({required this.petriNet});
 
@@ -32,7 +33,7 @@ class PetriNetPainter extends CustomPainter {
 
     // Rysowanie stanów
     for (final state in petriNet.states) {
-      canvas.drawCircle(state.center, state.radius, statePaint);
+      canvas.drawCircle(state.center, constStateRadius, statePaint);
 
       // Rysowanie etykiety stanu
       if (state.label != null) {
@@ -54,16 +55,16 @@ class PetriNetPainter extends CustomPainter {
             ..style = PaintingStyle.fill;
 
           final positions =
-              _getTokenPositions(state.center, state.radius, state.tokens);
+              _getTokenPositions(state.center, constStateRadius, state.tokens);
 
           for (final pos in positions) {
-            canvas.drawCircle(pos, state.radius / 4, tokenPaint);
+            canvas.drawCircle(pos, constStateRadius / 4, tokenPaint);
           }
         } else {
           // Rysowanie liczby tokenów
           textPainter.text = TextSpan(
             text: '${state.tokens}',
-            style: textStyle.copyWith(color: Colors.white, fontSize: 50),
+            style: textStyle.copyWith(color: Colors.white, fontSize: 35),
           );
           textPainter.layout();
           textPainter.paint(
@@ -110,33 +111,17 @@ class PetriNetPainter extends CustomPainter {
     }
 
     for (final state in petriNet.states) {
-      print(state);
-      for (final arc in state.incomingArcs) {
-        print("              $arc");
-      }
-    }
-
-    for (final state in petriNet.states) {
       // Rysowanie wychodzących łuków
       for (final arc in state.outgoingArcs) {
-        // Punkt początkowy łuku na krawędzi stanu
-        /*
-        final adjustedStart = _calculateEdgePoint(
-          arc.start,
-          arc.end,
-          state.radius, // Promień stanu
-        );
-        */
-        final adjustedStart = state.center;
-
         // Punkt końcowy łuku na krawędzi tranzycji
         final transition = petriNet.transitions.firstWhere(
           (t) => t.incomingArcs.contains(arc),
           orElse: () => throw Exception('Nie znaleziono tranzycji dla łuku.'),
         );
-
         final centerX = (transition.start.dx + transition.end.dx) / 2;
         final centerY = (transition.start.dy + transition.end.dy) / 2;
+        final adjustedStart = calculateClosestPoint(state.center,
+            constStateRadius, state.center, Offset(centerX, centerY));
         final adjustedEnd = Offset(centerX, centerY);
 
         _drawArrow(canvas, arcPaint, adjustedStart, adjustedEnd, arc.label,
@@ -154,16 +139,9 @@ class PetriNetPainter extends CustomPainter {
         final centerX = (transition.start.dx + transition.end.dx) / 2;
         final centerY = (transition.start.dy + transition.end.dy) / 2;
         final adjustedStart = Offset(centerX, centerY);
-
-        // Punkt końcowy łuku na krawędzi stanu
-        /*
-        final adjustedEnd = _calculateEdgePoint(
-          arc.end,
-          arc.start,
-          state.radius, // Promień stanu
-        );
-        */
-        final adjustedEnd = state.center;
+        //final adjustedEnd = state.center;
+        final adjustedEnd = calculateClosestPoint(state.center,
+            constStateRadius, state.center, Offset(centerX, centerY));
 
         _drawArrow(canvas, arcPaint, adjustedStart, adjustedEnd, arc.label,
             textPainter, textStyle);
@@ -190,15 +168,51 @@ class PetriNetPainter extends CustomPainter {
     canvas.drawPath(arcPath, paint);
   }
 
-  /// Oblicz punkt na krawędzi stanu
-  Offset _calculateEdgePoint(Offset start, Offset end, double radius) {
-    final dx = end.dx - start.dx;
-    final dy = end.dy - start.dy;
-    final angle = atan2(dy, dx);
-    return Offset(
-      start.dx + cos(angle) * radius,
-      start.dy + sin(angle) * radius,
+  Offset calculateClosestPoint(
+      Offset circleCenter, double radius, Offset lineStart, Offset lineEnd) {
+    // Wektor kierunkowy linii
+    final dx = lineEnd.dx - lineStart.dx;
+    final dy = lineEnd.dy - lineStart.dy;
+
+    // Wektor od środka okręgu do startu linii
+    final toStart =
+        Offset(lineStart.dx - circleCenter.dx, lineStart.dy - circleCenter.dy);
+
+    // Projekcja wektora na linię
+    final a = dx * dx + dy * dy; // Długość wektora kierunkowego do kwadratu
+    final b = 2 * (toStart.dx * dx + toStart.dy * dy);
+    final c =
+        toStart.dx * toStart.dx + toStart.dy * toStart.dy - radius * radius;
+
+    // Delta
+    final discriminant = b * b - 4 * a * c;
+
+    if (discriminant < 0) {
+      // Brak przecięcia - znajdź najbliższy punkt na brzegu okręgu
+      final nearestPoint = Offset(
+        circleCenter.dx + toStart.dx * radius / toStart.distance,
+        circleCenter.dy + toStart.dy * radius / toStart.distance,
+      );
+      return nearestPoint;
+    }
+
+    // Obliczamy t (punkty przecięcia)
+    final t1 = (-b - sqrt(discriminant)) / (2 * a);
+    final t2 = (-b + sqrt(discriminant)) / (2 * a);
+
+    // Wybieramy najbliższy punkt przecięcia
+    final tClosest = (t1 >= 0 && t1 <= 1)
+        ? t1
+        : (t2 >= 0 && t2 <= 1)
+            ? t2
+            : (t1 < 0 ? t2 : t1);
+
+    final intersection = Offset(
+      lineStart.dx + tClosest * dx,
+      lineStart.dy + tClosest * dy,
     );
+
+    return intersection;
   }
 
   List<Offset> _getTokenPositions(

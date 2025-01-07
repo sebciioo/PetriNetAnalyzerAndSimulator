@@ -343,7 +343,6 @@ class ImageProcessorApp:
         model_path = 'data/mnist_cnn_model.h5'
         try:
             recognizer = DigitRecognizer(model_path)
-            print(f"Model wczytano poprawnie: {model_path}")
         except OSError as e:
             print(f"Błąd podczas wczytywania modelu: {e}")
             exit(1)

@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:petri_net_front/backendServer/serverManager.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/state/providers/ImageState.dart';
-import 'package:petri_net_front/state/cubits/petriNetCubite.dart';
+import 'package:petri_net_front/state/providers/petriNetState.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/imageInput.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/petriNetsScreen.dart';
@@ -37,7 +37,7 @@ class ImagePickerScreen extends ConsumerWidget {
           source: ImageSource.gallery, maxWidth: 600);
 
       if (pickedImage == null) {
-        return; // Jeśli użytkownik anulował wybór
+        return;
       }
 
       ref.read(imageProvider.notifier).setImage(File(pickedImage.path));
@@ -47,17 +47,12 @@ class ImagePickerScreen extends ConsumerWidget {
       final PetriNet? jsonResponse =
           await serverManager.sendImageFromPhoneToServer(imageState!);
       ref.read(petriNetProvider.notifier).setPetriNet(jsonResponse!);
-      //print(jsonResponse.states.toString());
-      //print(jsonResponse.transitions.toString());
     }
 
     void goToPetriNetScreen(BuildContext context) {
       if (petriNetState != null) {
         Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (ctx) => PetriNetScreen(
-                    petriNets2: petriNetState,
-                  )),
+          MaterialPageRoute(builder: (ctx) => const PetriNetScreen()),
         );
       }
     }
