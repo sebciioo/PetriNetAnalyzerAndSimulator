@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:petri_net_front/backendServer/serverManager.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/state/providers/ImageState.dart';
+import 'package:petri_net_front/state/providers/errorState.dart';
 import 'package:petri_net_front/state/providers/petriNetState.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/imageInput.dart';
@@ -19,6 +20,7 @@ class ImagePickerScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final imageState = ref.watch(imageProvider);
     final petriNetState = ref.watch(petriNetProvider);
+    final errorState = ref.watch(errorProvider);
 
     void _takePicture() async {
       final imagePicker = ImagePicker();
@@ -43,17 +45,23 @@ class ImagePickerScreen extends ConsumerWidget {
       ref.read(imageProvider.notifier).setImage(File(pickedImage.path));
     }
 
-    void _setPetriNetToProvider() async {
-      final PetriNet? jsonResponse =
-          await serverManager.sendImageFromPhoneToServer(imageState!);
-      ref.read(petriNetProvider.notifier).setPetriNet(jsonResponse!);
+    void goToPetriNetScreen(BuildContext context) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (ctx) => const PetriNetScreen()),
+      );
     }
 
-    void goToPetriNetScreen(BuildContext context) {
-      if (petriNetState != null) {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (ctx) => const PetriNetScreen()),
-        );
+    void _setPetriNetToProvider(BuildContext context) async {
+      final jsonResponse =
+          await serverManager.sendImageFromPhoneToServer(imageState!);
+
+      if (!context.mounted) return;
+      if (!jsonResponse.containsKey('error')) {
+        final PetriNet petriNetResponse = PetriNet.fromJson(jsonResponse);
+        ref.read(petriNetProvider.notifier).setPetriNet(petriNetResponse);
+        goToPetriNetScreen(context);
+      } else {
+        ref.read(errorProvider.notifier).setText(jsonResponse['message']);
       }
     }
 
@@ -178,8 +186,7 @@ class ImagePickerScreen extends ConsumerWidget {
                                       label: "Gotowe!",
                                       icon: Icons.check,
                                       onPressed: () {
-                                        _setPetriNetToProvider();
-                                        goToPetriNetScreen(context);
+                                        _setPetriNetToProvider(context);
                                       },
                                       backgroundColor: Theme.of(context)
                                           .colorScheme
@@ -245,7 +252,21 @@ class ImagePickerScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-              )
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: errorState != null
+                    ? Container(
+                        child: Text(
+                          errorState,
+                          style: const TextStyle(
+                              color:
+                                  Colors.red), // Opcjonalnie stylizacja błędu
+                        ),
+                      )
+                    : const SizedBox
+                        .shrink(), // Puste miejsce, jeśli `errorState` jest `null`
+              ),
             ],
           ),
         ),

@@ -10,84 +10,18 @@ import 'dart:convert';
 class FlaskServer {
   static const platform = MethodChannel('chaquopy');
 
-  Future<void> startPythonServer() async {
+  Future<String> startPythonServer() async {
     try {
       final result = await platform.invokeMethod('start_server');
       debugPrint('Serwer Flask został uruchomiony: $result');
+      return "Serwer Flask został uruchomiony pomyślnie";
     } catch (e) {
       debugPrint('Błąd uruchamiania serwera Flask: $e');
+      return "Błąd uruchamiania serwera Flask: $e";
     }
   }
 
-  Future<void> testServerConnection() async {
-    try {
-      final response = await http.get(Uri.parse('http://10.0.2.16:5666'));
-      if (response.statusCode == 200) {
-        debugPrint('Połączenie z serwerem Flask działa: ${response.body}');
-      } else {
-        debugPrint('Błąd połączenia: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Nie można połączyć się z serwerem Flask: $e');
-    }
-  }
-
-  Future<void> testServerConnection2() async {
-    try {
-      final response = await http.get(Uri.parse('http://10.0.2.16:5666'));
-      if (response.statusCode == 200) {
-        debugPrint('Połączenie z serwerem Flask działa: ${response.body}');
-      } else {
-        debugPrint('Błąd połączenia: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Nie można połączyć się z serwerem Flask: $e');
-    }
-  }
-
-  Future<void> testPostRequest() async {
-    final url = Uri.parse('http://10.0.2.16:5666/test_post');
-    final headers = {'Content-Type': 'application/json'};
-    final body = json.encode({"name": "John Doe", "age": 25});
-
-    try {
-      final response = await http.post(url, headers: headers, body: body);
-
-      if (response.statusCode == 200) {
-        print('Odpowiedź serwera: ${response.body}');
-      } else {
-        print('Błąd: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Błąd podczas wysyłania żądania POST: $e');
-    }
-  }
-
-  Future<void> sendImageRequest(String imagePath) async {
-    final String url = 'http://10.0.2.16:5666/process'; // Adres serwera Flask
-
-    try {
-      // Tworzenie URI z parametrem GET
-      final Uri uri = Uri.parse(url).replace(queryParameters: {
-        'image': imagePath,
-      });
-
-      // Wysyłanie żądania GET
-      final response = await http.get(uri);
-
-      // Sprawdzanie odpowiedzi serwera
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print('Odpowiedź serwera: $data');
-      } else {
-        print('Błąd serwera: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Błąd połączenia: $e');
-    }
-  }
-
-  Future<PetriNet?> sendImageToServer(File imageFile) async {
+  Future<Map<String, dynamic>> sendImageToServer(File imageFile) async {
     final request = http.MultipartRequest(
       'POST',
       Uri.parse('http://10.0.2.16:5666/process'),
@@ -105,14 +39,21 @@ class FlaskServer {
         final responseBody = await response.stream.bytesToString();
         final jsonResponse = jsonDecode(responseBody);
         print('Upload successful. Server response: $jsonResponse');
-        return PetriNet.fromJson(jsonResponse);
+        return jsonResponse;
       } else {
         print('Upload failed with status: ${response.statusCode}');
-        return null;
+        return {
+          'error': 'Upload failed',
+          'statusCode': response.statusCode,
+          'message': await response.stream.bytesToString(),
+        };
       }
     } catch (e) {
       print('Błąd podczas wysyłania obrazu: $e');
-      return null;
+      return {
+        'error': 'Exception occurred',
+        'message': e.toString(),
+      };
     }
   }
 }

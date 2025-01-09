@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
+import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addSubtractTokensToState.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/featuresTile.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/managementOption.dart';
@@ -20,27 +21,23 @@ class PetriNetScreen extends ConsumerWidget {
 
     void activateTransition(Transition transition, bool isActive) {
       if (isActive) {
-        // Usuwanie tokenów z powiązanych stanów
         for (final arc in transition.incomingArcs) {
           final relatedStates =
               petriNetState!.states.where((s) => s.outgoingArcs.contains(arc));
           for (final state in relatedStates) {
             if (state.tokens > 0) {
-              state.tokens--;
-              break; // Upewnij się, że usuwasz tylko jeden token
+              ref.read(petriNetProvider.notifier).removeToken(state);
+              break;
             }
           }
         }
-
-        // Dodawanie tokenów do powiązanych stanów
         for (final arc in transition.outgoingArcs) {
           final relatedStates =
               petriNetState!.states.where((s) => s.incomingArcs.contains(arc));
           for (final state in relatedStates) {
-            state.tokens++; // Dodawanie tokenu do każdego powiązanego stanu
+            ref.read(petriNetProvider.notifier).addToken(state);
           }
         }
-        ref.read(petriNetProvider.notifier).updateState();
       }
     }
 
@@ -166,6 +163,8 @@ class PetriNetScreen extends ConsumerWidget {
                     // Przyciski na stałych pozycjach w stosunku do diagramu
                     if (modeState.simulationMode == true)
                       ..._buildTransitionButtons(),
+                    if (modeState.editingMode == true)
+                      const AddSubtractTokensToState(),
                   ],
                 ),
               ),
@@ -245,10 +244,10 @@ class PetriNetScreen extends ConsumerWidget {
                           child: CustomElevatedButton(
                             label: "Tryb symulacji",
                             onPressed: onTapSimulationButton,
-                            backgroundColor: !modeState.simulationMode
+                            backgroundColor: modeState.simulationMode
                                 ? Theme.of(context).colorScheme.secondary
                                 : Colors.white,
-                            textColor: !modeState.simulationMode
+                            textColor: modeState.simulationMode
                                 ? Colors.white
                                 : Theme.of(context).colorScheme.inverseSurface,
                             fontMin: 15,
@@ -263,10 +262,10 @@ class PetriNetScreen extends ConsumerWidget {
                           child: CustomElevatedButton(
                             label: "Tryb edycji",
                             onPressed: onTapEditingButton,
-                            backgroundColor: !modeState.editingMode
+                            backgroundColor: modeState.editingMode
                                 ? Theme.of(context).colorScheme.secondary
                                 : Colors.white,
-                            textColor: !modeState.editingMode
+                            textColor: modeState.editingMode
                                 ? Colors.white
                                 : Theme.of(context).colorScheme.inverseSurface,
                             fontMin: 15,

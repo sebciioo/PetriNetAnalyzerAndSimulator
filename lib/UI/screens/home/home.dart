@@ -13,10 +13,19 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String serverResponse = '';
   @override
   void initState() {
     super.initState();
-    widget.serverManager.initializeServer();
+    startServer(); // Wywołanie metody, która obsłuży asynchroniczną operację
+  }
+
+  void startServer() async {
+    final response = await widget.serverManager.initializeServer();
+    setState(() {
+      serverResponse =
+          response; // Zaktualizowanie stanu po zakończeniu operacji
+    });
   }
 
   void goToUploadFile(BuildContext context) {
@@ -146,6 +155,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Container(
+                  child: Text(serverResponse), // Pusty tekst jako placeholder
                 ),
               ),
             ],

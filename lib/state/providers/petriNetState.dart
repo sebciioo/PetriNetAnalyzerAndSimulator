@@ -12,12 +12,44 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
     );
   }
 
-  void updateState() {
+  void updateState({
+    List<Arc>? arcs,
+    List<States>? states,
+    List<Transition>? transitions,
+  }) {
     if (state != null) {
       state = PetriNet(
-        arcs: List.from(state!.arcs),
-        states: List.from(state!.states),
-        transitions: List.from(state!.transitions),
+        arcs: arcs ?? state!.arcs,
+        states: states ?? state!.states,
+        transitions: transitions ?? state!.transitions,
+      );
+    }
+  }
+
+  void addToken(States selectedState) {
+    if (state != null) {
+      final updatedStates = state!.states.map((state) {
+        if (state == selectedState) {
+          return state..tokens += 1;
+        }
+        return state;
+      }).toList();
+      updateState(
+        states: updatedStates,
+      );
+    }
+  }
+
+  void removeToken(States selectedState) {
+    if (state != null) {
+      final updatedStates = state!.states.map((state) {
+        if (state == selectedState) {
+          return state..tokens -= 1;
+        }
+        return state;
+      }).toList();
+      updateState(
+        states: updatedStates,
       );
     }
   }
