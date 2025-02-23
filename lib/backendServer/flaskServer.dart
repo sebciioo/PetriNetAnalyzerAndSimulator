@@ -2,7 +2,6 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:http_parser/http_parser.dart';
-import '../../data/models/petriNet.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
@@ -24,7 +23,7 @@ class FlaskServer {
   Future<Map<String, dynamic>> sendImageToServer(File imageFile) async {
     final request = http.MultipartRequest(
       'POST',
-      Uri.parse('http://10.0.2.16:5666/process'),
+      Uri.parse('http://127.0.0.1:5666/process'),
     );
     request.files.add(await http.MultipartFile.fromPath(
       'image',

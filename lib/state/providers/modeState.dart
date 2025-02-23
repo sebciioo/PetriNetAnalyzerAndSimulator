@@ -8,6 +8,7 @@ class ModeStateNotifier extends StateNotifier<Mode> {
     state = const Mode(
       editingMode: true,
       simulationMode: false,
+      editModeType: EditModeType.none,
     );
   }
 
@@ -15,7 +16,12 @@ class ModeStateNotifier extends StateNotifier<Mode> {
     state = const Mode(
       editingMode: false,
       simulationMode: true,
+      editModeType: EditModeType.none,
     );
+  }
+
+  void setEditModeType(EditModeType type) {
+    state = state.copyWith(editModeType: type);
   }
 }
 

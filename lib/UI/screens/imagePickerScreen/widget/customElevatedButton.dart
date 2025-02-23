@@ -11,6 +11,7 @@ class CustomElevatedButton extends StatelessWidget {
       this.borderColor,
       this.fontMin = 14,
       this.fontMax = 24,
+      this.padding = 16,
       super.key});
 
   final String label;
@@ -21,6 +22,7 @@ class CustomElevatedButton extends StatelessWidget {
   final Color? borderColor;
   final double? fontMin;
   final double? fontMax;
+  final double? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,7 @@ class CustomElevatedButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         side: borderColor != null ? BorderSide(color: borderColor!) : null,
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: EdgeInsets.symmetric(vertical: padding!),
       ),
       icon: icon != null
           ? Icon(
@@ -39,6 +41,7 @@ class CustomElevatedButton extends StatelessWidget {
           : null,
       label: Text(
         label,
+        textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: MediaQuery.sizeOf(context).width < kBreakpointSmall
               ? fontMin

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addSubtractTokensToState.dart';
+import 'package:petri_net_front/UI/screens/petriNetScreen/widget/removeElementsFromNet.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/featuresTile.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/managementOption.dart';
@@ -8,6 +8,8 @@ import 'package:petri_net_front/UI/screens/petriNetScreen/widget/petriNetPainter
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petri_net_front/state/providers/modeState.dart';
 import 'package:defer_pointer/defer_pointer.dart';
+import 'package:petri_net_front/data/models/mode.dart';
+import 'package:petri_net_front/UI/utils/pointerNearLine.dart';
 import 'package:petri_net_front/state/providers/petriNetState.dart';
 
 class PetriNetScreen extends ConsumerWidget {
@@ -143,29 +145,80 @@ class PetriNetScreen extends ConsumerWidget {
         child: Column(
           children: [
             Expanded(
-              child: InteractiveViewer(
-                clipBehavior: Clip.none,
-                boundaryMargin: const EdgeInsets.all(2000.0),
-                minScale: 0.5,
-                maxScale: 3.0,
-                child: Stack(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTapDown: (details) {
+                  if (modeState.editModeType == EditModeType.removeElements) {
+                    print("Tap detected at: ${details.localPosition}");
+
+                    // Pobieramy macierz transformacji z InteractiveViewer
+                    final Matrix4 matrix = transformationController.value;
+
+                    // Odwracamy macierz, aby uzyskać poprawne współrzędne przed transformacją
+                    final Matrix4 inverseMatrix = Matrix4.inverted(matrix);
+
+                    // Pobieramy lokalne współrzędne kliknięcia
+                    final Offset localPosition = details.localPosition;
+
+                    // Transformujemy współrzędne kliknięcia do rzeczywistej przestrzeni diagramu
+                    final double x =
+                        localPosition.dx * inverseMatrix.entry(0, 0) +
+                            localPosition.dy * inverseMatrix.entry(0, 1) +
+                            inverseMatrix.entry(0, 3);
+
+                    final double y =
+                        localPosition.dx * inverseMatrix.entry(1, 0) +
+                            localPosition.dy * inverseMatrix.entry(1, 1) +
+                            inverseMatrix.entry(1, 3);
+
+                    final Offset correctedPosition = Offset(x, y);
+                    print("Final corrected position: $correctedPosition");
+
+                    //Usuwanie stanu
+                    for (final state in petriNetState.states) {
+                      if ((correctedPosition - state.center).distance < 45) {
+                        print('Kliknieto w stan');
+                      }
+                    }
+
+                    //Usuwanie tranyzcji
+                    for (final transition in petriNetState.transitions) {
+                      if (isPointNearLine(correctedPosition, transition.start,
+                          transition.end, 10)) {
+                        print('Kliknieto w tranzycje');
+                      }
+                    }
+                    //Usuwanie łuku
+                  }
+                },
+                child: InteractiveViewer(
                   clipBehavior: Clip.none,
-                  children: [
-                    // Tło i diagram
-                    Container(
-                      width: 2000,
-                      height: 2000,
-                      color: Colors.grey[200],
-                      child: CustomPaint(
-                        painter: PetriNetPainter(petriNet: petriNetState!),
+                  boundaryMargin: const EdgeInsets.all(2000.0),
+                  minScale: 0.5,
+                  transformationController: transformationController,
+                  maxScale: 3.0,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Tło i diagram
+
+                      Container(
+                        width: 2000,
+                        height: 2000,
+                        color: Colors.grey[200],
+                        child: CustomPaint(
+                          painter: PetriNetPainter(petriNet: petriNetState!),
+                        ),
                       ),
-                    ),
-                    // Przyciski na stałych pozycjach w stosunku do diagramu
-                    if (modeState.simulationMode == true)
-                      ..._buildTransitionButtons(),
-                    if (modeState.editingMode == true)
-                      const AddSubtractTokensToState(),
-                  ],
+
+                      if (modeState.simulationMode == true)
+                        ..._buildTransitionButtons(),
+                      if (modeState.editModeType == EditModeType.addTokens)
+                        const AddSubtractTokensToState(),
+                      if (modeState.editModeType == EditModeType.removeElements)
+                        const RemoveElementsFromNet(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -238,39 +291,46 @@ class PetriNetScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(
-                          width: double
-                              .infinity, // Stretches the button horizontally
-                          child: CustomElevatedButton(
-                            label: "Tryb symulacji",
-                            onPressed: onTapSimulationButton,
-                            backgroundColor: modeState.simulationMode
-                                ? Theme.of(context).colorScheme.secondary
-                                : Colors.white,
-                            textColor: modeState.simulationMode
-                                ? Colors.white
-                                : Theme.of(context).colorScheme.inverseSurface,
-                            fontMin: 15,
-                            fontMax: 20,
-                          ),
+                        Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.center, // Wyśrodkowanie
+
+                          children: [
+                            Text(
+                              modeState.simulationMode
+                                  ? "Tryb symulacji"
+                                  : "Tryb edycji",
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.scrim,
+                              ),
+                            ),
+                            SizedBox(width: 5), // Odstęp między tekstem a ikoną
+                            Icon(
+                              modeState.simulationMode
+                                  ? Icons.play_circle_fill
+                                  : Icons.edit, // Zmiana ikony
+                              color: Colors.black,
+                              size: 22, // Rozmiar ikony
+                            ),
+                          ],
                         ),
-                        const SizedBox(
-                            height: 16), // Spacing between the buttons
-                        SizedBox(
-                          width: double
-                              .infinity, // Stretches the button horizontally
-                          child: CustomElevatedButton(
-                            label: "Tryb edycji",
-                            onPressed: onTapEditingButton,
-                            backgroundColor: modeState.editingMode
-                                ? Theme.of(context).colorScheme.secondary
-                                : Colors.white,
-                            textColor: modeState.editingMode
-                                ? Colors.white
-                                : Theme.of(context).colorScheme.inverseSurface,
-                            fontMin: 15,
-                            fontMax: 20,
-                          ),
+                        SizedBox(height: 5),
+                        Switch(
+                          value: modeState.simulationMode,
+                          activeColor: Colors.white, // Kolor kółka
+                          activeTrackColor:
+                              Color(0xFF0077B6), // Kolor toru włączonego
+                          inactiveTrackColor:
+                              Colors.grey[400], // Kolor toru wyłączonego
+                          onChanged: (bool value) {
+                            if (value) {
+                              onTapSimulationButton();
+                            } else {
+                              onTapEditingButton();
+                            }
+                          },
                         ),
                       ],
                     ),

@@ -1,64 +1,94 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
-import 'package:petri_net_front/UI/screens/petriNetScreen/widget/StateTokenTile.dart';
-import 'package:defer_pointer/defer_pointer.dart';
+import 'package:petri_net_front/state/providers/modeState.dart';
+import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
+import 'package:petri_net_front/data/models/mode.dart';
 
-class ManagementOption extends StatefulWidget {
+class ManagementOption extends ConsumerWidget {
   const ManagementOption({super.key, required this.petriNet});
   final PetriNet petriNet;
 
   @override
-  State<StatefulWidget> createState() {
-    return _ManagementOption();
-  }
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modeState = ref.watch(modeProvider);
 
-class _ManagementOption extends State<ManagementOption> {
-  @override
-  Widget build(BuildContext context) {
-    return Column(children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Container(
-          child: const Text(
-            'Dodaj tokeny do stanów zgodnie naciskając + lub usuń naciskając -',
-            style: const TextStyle(
-              color: Color(0xFF212121),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+    return GridView.count(
+      shrinkWrap: true,
+      crossAxisCount: 2,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 2,
+      children: [
+        CustomElevatedButton(
+          label: "Edytuj tokeny",
+          onPressed: () {
+            ref
+                .read(modeProvider.notifier)
+                .setEditModeType(EditModeType.addTokens);
+          },
+          backgroundColor: modeState.editModeType == EditModeType.addTokens
+              ? Theme.of(context).colorScheme.secondary
+              : Colors.white,
+          textColor: modeState.editModeType == EditModeType.addTokens
+              ? Colors.white
+              : Colors.black,
+          fontMin: 14,
+          fontMax: 15,
+          padding: 2,
         ),
-      ),
-      // Tile 2: Dodaj/usuń stany
-      /*
-      ExpansionTile(
-        title: const Text(
-          "Dodaj/usuń stany",
-          style: TextStyle(
-            color: Color(0xFF212121),
-            fontWeight: FontWeight.bold,
-          ),
+        CustomElevatedButton(
+          label: "Dodaj elementy",
+          onPressed: () {
+            ref
+                .read(modeProvider.notifier)
+                .setEditModeType(EditModeType.addElements);
+          },
+          backgroundColor: modeState.editModeType == EditModeType.addElements
+              ? Theme.of(context).colorScheme.secondary
+              : Colors.white,
+          textColor: modeState.editModeType == EditModeType.addElements
+              ? Colors.white
+              : Colors.black,
+          fontMin: 14,
+          fontMax: 15,
+          padding: 2,
         ),
-        tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(left: 10),
-        children: [
-          ListTile(
-            leading: const Icon(Icons.add_circle, color: Colors.green),
-            title: const Text("Dodaj stan"),
-            onTap: () {
-              // Logika dodawania stanu
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.remove_circle, color: Colors.red),
-            title: const Text("Usuń stan"),
-            onTap: () {
-              // Logika usuwania stanu
-            },
-          ),
-        ],
-      ),
-      */
-    ]);
+        CustomElevatedButton(
+          label: "Usuń elementy",
+          onPressed: () {
+            ref
+                .read(modeProvider.notifier)
+                .setEditModeType(EditModeType.removeElements);
+          },
+          backgroundColor: modeState.editModeType == EditModeType.removeElements
+              ? Theme.of(context).colorScheme.secondary
+              : Colors.white,
+          textColor: modeState.editModeType == EditModeType.removeElements
+              ? Colors.white
+              : Colors.black,
+          fontMin: 14,
+          fontMax: 15,
+          padding: 2,
+        ),
+        CustomElevatedButton(
+          label: "Przesuń elementy",
+          onPressed: () {
+            ref
+                .read(modeProvider.notifier)
+                .setEditModeType(EditModeType.moveElements);
+          },
+          backgroundColor: modeState.editModeType == EditModeType.moveElements
+              ? Theme.of(context).colorScheme.secondary
+              : Colors.white,
+          textColor: modeState.editModeType == EditModeType.moveElements
+              ? Colors.white
+              : Colors.black,
+          fontMin: 14,
+          fontMax: 15,
+          padding: 2,
+        ),
+      ],
+    );
   }
 }
