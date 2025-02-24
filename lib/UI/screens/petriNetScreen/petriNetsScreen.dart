@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElementRemover.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addSubtractTokensToState.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/removeElementsFromNet.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
@@ -7,9 +8,9 @@ import 'package:petri_net_front/UI/screens/petriNetScreen/widget/managementOptio
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/petriNetPainter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petri_net_front/state/providers/modeState.dart';
+import 'package:petri_net_front/state/providers/transformationState.dart';
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:petri_net_front/data/models/mode.dart';
-import 'package:petri_net_front/UI/utils/pointerNearLine.dart';
 import 'package:petri_net_front/state/providers/petriNetState.dart';
 
 class PetriNetScreen extends ConsumerWidget {
@@ -19,7 +20,8 @@ class PetriNetScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final petriNetState = ref.watch(petriNetProvider);
     final modeState = ref.watch(modeProvider);
-    final transformationController = TransformationController();
+    final transformationController =
+        ref.watch(transformationControllerProvider);
 
     void activateTransition(Transition transition, bool isActive) {
       if (isActive) {
@@ -52,17 +54,16 @@ class PetriNetScreen extends ConsumerWidget {
     }
 
     // Funkcja generująca dynamiczne przyciski
-    List<Widget> _buildTransitionButtons() {
+    List<Widget> _buildTransitionButtons(WidgetRef ref) {
       return petriNetState!.transitions.map((transition) {
-        final position = Offset(
+        final Offset rawPosition = Offset(
           (transition.start.dx + transition.end.dx) / 2,
           (transition.start.dy + transition.end.dy) / 2,
         );
 
-        final transformedPosition = transformationController.toScene(position);
-
         const double buttonSize = 50.0;
 
+        // Sprawdzamy, czy tranzycja jest aktywna
         final isActive = transition.incomingArcs.every((arc) {
           final relatedStates =
               petriNetState.states.where((s) => s.outgoingArcs.contains(arc));
@@ -72,12 +73,11 @@ class PetriNetScreen extends ConsumerWidget {
         if (!isActive) return const SizedBox.shrink();
 
         return Positioned(
-          top: transformedPosition.dy - buttonSize / 2,
-          left: transformedPosition.dx - buttonSize / 2,
+          top: rawPosition.dy - (buttonSize / 2),
+          left: rawPosition.dx - (buttonSize / 2),
           child: DeferPointer(
             child: GestureDetector(
               onTap: () {
-                // Obsługa kliknięcia
                 activateTransition(transition, isActive);
               },
               child: Container(
@@ -149,46 +149,28 @@ class PetriNetScreen extends ConsumerWidget {
                 behavior: HitTestBehavior.translucent,
                 onTapDown: (details) {
                   if (modeState.editModeType == EditModeType.removeElements) {
-                    print("Tap detected at: ${details.localPosition}");
+                    final remover = PetriNetElementRemover(
+                      transformationController: transformationController,
+                      petriNetState: petriNetState,
+                    );
+                    final clickedElement = remover.handleTap(details);
 
-                    // Pobieramy macierz transformacji z InteractiveViewer
-                    final Matrix4 matrix = transformationController.value;
-
-                    // Odwracamy macierz, aby uzyskać poprawne współrzędne przed transformacją
-                    final Matrix4 inverseMatrix = Matrix4.inverted(matrix);
-
-                    // Pobieramy lokalne współrzędne kliknięcia
-                    final Offset localPosition = details.localPosition;
-
-                    // Transformujemy współrzędne kliknięcia do rzeczywistej przestrzeni diagramu
-                    final double x =
-                        localPosition.dx * inverseMatrix.entry(0, 0) +
-                            localPosition.dy * inverseMatrix.entry(0, 1) +
-                            inverseMatrix.entry(0, 3);
-
-                    final double y =
-                        localPosition.dx * inverseMatrix.entry(1, 0) +
-                            localPosition.dy * inverseMatrix.entry(1, 1) +
-                            inverseMatrix.entry(1, 3);
-
-                    final Offset correctedPosition = Offset(x, y);
-                    print("Final corrected position: $correctedPosition");
-
-                    //Usuwanie stanu
-                    for (final state in petriNetState.states) {
-                      if ((correctedPosition - state.center).distance < 45) {
-                        print('Kliknieto w stan');
-                      }
+                    if (clickedElement is States) {
+                      print('❌ Usunięto stan');
+                      ref
+                          .read(petriNetProvider.notifier)
+                          .removeState(clickedElement);
+                    } else if (clickedElement is Transition) {
+                      print('❌ Usunięto tranzycję');
+                      ref
+                          .read(petriNetProvider.notifier)
+                          .removeTransition(clickedElement);
+                    } else if (clickedElement is Arc) {
+                      print('❌ Usunięto łuk');
+                      ref
+                          .read(petriNetProvider.notifier)
+                          .removeArc(clickedElement);
                     }
-
-                    //Usuwanie tranyzcji
-                    for (final transition in petriNetState.transitions) {
-                      if (isPointNearLine(correctedPosition, transition.start,
-                          transition.end, 10)) {
-                        print('Kliknieto w tranzycje');
-                      }
-                    }
-                    //Usuwanie łuku
                   }
                 },
                 child: InteractiveViewer(
@@ -212,16 +194,37 @@ class PetriNetScreen extends ConsumerWidget {
                       ),
 
                       if (modeState.simulationMode == true)
-                        ..._buildTransitionButtons(),
+                        ..._buildTransitionButtons(ref),
                       if (modeState.editModeType == EditModeType.addTokens)
                         const AddSubtractTokensToState(),
-                      if (modeState.editModeType == EditModeType.removeElements)
-                        const RemoveElementsFromNet(),
                     ],
                   ),
                 ),
               ),
             ),
+            if (modeState.editModeType == EditModeType.removeElements)
+              Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(color: Colors.black, width: 2),
+                      ),
+                      child: const Text(
+                        "Wybierz element, który chcesz usunąć",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )),
+              ),
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(

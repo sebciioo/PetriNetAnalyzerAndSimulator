@@ -89,10 +89,8 @@ class Arc {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other))
-      return true; // Jeśli to ten sam obiekt w pamięci
-    if (other is! Arc) return false; // Jeśli typ jest inny, nie są równe
-
+    if (identical(this, other)) return true;
+    if (other is! Arc) return false;
     return start == other.start &&
         end == other.end &&
         label == other.label &&
@@ -168,6 +166,24 @@ State(center: ${center.dx}, ${center.dy}, radius: $radius, label: $label, tokens
   outgoingArcs: ${outgoingArcs.map((arc) => arc.toString()).join(', ')});
 ''';
   }
+
+  States copyWith({
+    Offset? center,
+    double? radius,
+    String? label,
+    int? tokens,
+    List<Arc>? incomingArcs,
+    List<Arc>? outgoingArcs,
+  }) {
+    return States(
+      center: center ?? this.center,
+      radius: radius ?? this.radius,
+      label: label ?? this.label,
+      tokens: tokens ?? this.tokens,
+      incomingArcs: incomingArcs ?? this.incomingArcs,
+      outgoingArcs: outgoingArcs ?? this.outgoingArcs,
+    );
+  }
 }
 
 class Transition {
@@ -227,5 +243,21 @@ Transition(start: ${start.dx}, ${start.dy}, end: ${end.dx}, ${end.dy}, label: $l
   incomingArcs: ${incomingArcs.map((arc) => arc.toString()).join(', ')},
   outgoingArcs: ${outgoingArcs.map((arc) => arc.toString()).join(', ')});
 ''';
+  }
+
+  Transition copyWith({
+    Offset? start,
+    Offset? end,
+    String? label,
+    List<Arc>? incomingArcs,
+    List<Arc>? outgoingArcs,
+  }) {
+    return Transition(
+      start: start ?? this.start,
+      end: end ?? this.end,
+      label: label ?? this.label,
+      incomingArcs: incomingArcs ?? this.incomingArcs,
+      outgoingArcs: outgoingArcs ?? this.outgoingArcs,
+    );
   }
 }

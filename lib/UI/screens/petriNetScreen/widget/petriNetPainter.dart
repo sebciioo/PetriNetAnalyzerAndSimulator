@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:petri_net_front/UI/utils/calculateClosetPoint.dart';
 import 'package:flutter/material.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:arrow_path/arrow_path.dart';
@@ -166,53 +166,6 @@ class PetriNetPainter extends CustomPainter {
     arcPath = ArrowPath.addTip(arcPath);
 
     canvas.drawPath(arcPath, paint);
-  }
-
-  Offset calculateClosestPoint(
-      Offset circleCenter, double radius, Offset lineStart, Offset lineEnd) {
-    // Wektor kierunkowy linii
-    final dx = lineEnd.dx - lineStart.dx;
-    final dy = lineEnd.dy - lineStart.dy;
-
-    // Wektor od środka okręgu do startu linii
-    final toStart =
-        Offset(lineStart.dx - circleCenter.dx, lineStart.dy - circleCenter.dy);
-
-    // Projekcja wektora na linię
-    final a = dx * dx + dy * dy; // Długość wektora kierunkowego do kwadratu
-    final b = 2 * (toStart.dx * dx + toStart.dy * dy);
-    final c =
-        toStart.dx * toStart.dx + toStart.dy * toStart.dy - radius * radius;
-
-    // Delta
-    final discriminant = b * b - 4 * a * c;
-
-    if (discriminant < 0) {
-      // Brak przecięcia - znajdź najbliższy punkt na brzegu okręgu
-      final nearestPoint = Offset(
-        circleCenter.dx + toStart.dx * radius / toStart.distance,
-        circleCenter.dy + toStart.dy * radius / toStart.distance,
-      );
-      return nearestPoint;
-    }
-
-    // Obliczamy t (punkty przecięcia)
-    final t1 = (-b - sqrt(discriminant)) / (2 * a);
-    final t2 = (-b + sqrt(discriminant)) / (2 * a);
-
-    // Wybieramy najbliższy punkt przecięcia
-    final tClosest = (t1 >= 0 && t1 <= 1)
-        ? t1
-        : (t2 >= 0 && t2 <= 1)
-            ? t2
-            : (t1 < 0 ? t2 : t1);
-
-    final intersection = Offset(
-      lineStart.dx + tClosest * dx,
-      lineStart.dy + tClosest * dy,
-    );
-
-    return intersection;
   }
 
   List<Offset> _getTokenPositions(
