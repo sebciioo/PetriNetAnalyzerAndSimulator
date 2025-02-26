@@ -69,9 +69,11 @@ class InitializationService:
             for circle in circles[0, :]:
                 center = (circle[0], circle[1])
                 radius = circle[2]
+                state_label = f"S{len(self.PetriNet.states) + 1}"
                 cv2.circle(self.image , center, 1, (0, 100, 100), 3)
                 cv2.circle(self.image , center, radius, (255, 0, 255), 3)
-                state = State(center=center, radius=radius)
+                state = State(center=center, radius=radius, label=state_label)
+                print(state_label)
                 self.PetriNet.add_state(state)
 
     def detect_arrow_with_transition(self):
@@ -83,7 +85,8 @@ class InitializationService:
             for transition in transitions:
                 start_point = tuple(transition[0][:2])
                 end_point = tuple(transition[0][2:])
-                transition = Transition(start_point, end_point)
+                transition_label = f"S{len(self.PetriNet.transitions) + 1}"
+                transition = Transition(start_point, end_point, label=transition_label)
                 self.PetriNet.add_transition(transition)
             for arrow in arrows:
                 start_point = arrow[0]

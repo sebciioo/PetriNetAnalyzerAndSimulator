@@ -6,6 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class PetriNetNotifier extends StateNotifier<PetriNet?> {
   PetriNetNotifier() : super(null);
 
+  dynamic selectedElement;
+
+  void setSelectedElement(dynamic element) {
+    selectedElement = element;
+  }
+
   void setPetriNet(PetriNet petriNetResponse) {
     state = PetriNet(
       arcs: petriNetResponse.arcs,
@@ -156,6 +162,30 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
           states: updatedStates,
           transitions: updatedTransitions);
       print('❌ Usunięto łuk globalnie: $selectedArc');
+    }
+  }
+
+  void updateElementPosition() {
+    if (state == null || selectedElement == null) return;
+
+    if (selectedElement is States) {
+      final List<States> updatedStates = state!.states.map((s) {
+        if (s.label == selectedElement.label) {
+          return selectedElement as States;
+        }
+        return s;
+      }).toList();
+
+      updateState(states: updatedStates);
+    } else if (selectedElement is Transition) {
+      final List<Transition> updatedTransitions = state!.transitions.map((t) {
+        if (t.start == selectedElement.start && t.end == selectedElement.end) {
+          return selectedElement as Transition;
+        }
+        return t;
+      }).toList();
+
+      updateState(transitions: updatedTransitions);
     }
   }
 }
