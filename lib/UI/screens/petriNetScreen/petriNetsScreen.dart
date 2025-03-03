@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElementMover.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElementRemover.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addSubtractTokensToState.dart';
+import 'package:petri_net_front/UI/utils/PetriNetUtils.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/featuresTile.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/managementOption.dart';
@@ -150,116 +151,90 @@ class PetriNetScreen extends ConsumerWidget {
         child: Column(
           children: [
             Expanded(
-              child: modeState.editModeType != EditModeType.moveElements
-                  ? GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTapDown: (details) {
-                        if (modeState.editModeType ==
-                            EditModeType.removeElements) {
-                          final remover = PetriNetElementRemover(
-                            transformationController: transformationController,
-                            petriNetState: petriNetState!,
-                          );
-                          final clickedElement = remover.handleTap(details);
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTapDown: (details) {
+                  if (modeState.editModeType == EditModeType.removeElements) {
+                    final remover = PetriNetElementRemover(
+                      transformationController: transformationController,
+                      petriNetState: petriNetState!,
+                    );
+                    final clickedElement = remover.handleTap(details);
 
-                          if (clickedElement is States) {
-                            print('❌ Usunięto stan');
-                            ref
-                                .read(petriNetProvider.notifier)
-                                .removeState(clickedElement);
-                          } else if (clickedElement is Transition) {
-                            print('❌ Usunięto tranzycję');
-                            ref
-                                .read(petriNetProvider.notifier)
-                                .removeTransition(clickedElement);
-                          } else if (clickedElement is Arc) {
-                            print('❌ Usunięto łuk');
-                            ref
-                                .read(petriNetProvider.notifier)
-                                .removeArc(clickedElement);
-                          }
-                        }
-                      },
-                      child: InteractiveViewer(
-                        clipBehavior: Clip.none,
-                        boundaryMargin: const EdgeInsets.all(2000.0),
-                        minScale: 0.5,
-                        transformationController: transformationController,
-                        maxScale: 3.0,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            // Tło i diagram
-
-                            Container(
-                              width: 2000,
-                              height: 2000,
-                              color: Colors.grey[200],
-                              child: CustomPaint(
-                                painter:
-                                    PetriNetPainter(petriNet: petriNetState),
-                              ),
-                            ),
-
-                            if (modeState.simulationMode == true)
-                              ..._buildTransitionButtons(ref),
-                            if (modeState.editModeType ==
-                                EditModeType.addTokens)
-                              const AddSubtractTokensToState(),
-                          ],
+                    if (clickedElement is States) {
+                      print('❌ Usunięto stan');
+                      ref
+                          .read(petriNetProvider.notifier)
+                          .removeState(clickedElement);
+                    } else if (clickedElement is Transition) {
+                      print('❌ Usunięto tranzycję');
+                      ref
+                          .read(petriNetProvider.notifier)
+                          .removeTransition(clickedElement);
+                    } else if (clickedElement is Arc) {
+                      print('❌ Usunięto łuk');
+                      ref
+                          .read(petriNetProvider.notifier)
+                          .removeArc(clickedElement);
+                    }
+                  }
+                },
+                child: InteractiveViewer(
+                  clipBehavior: Clip.none,
+                  boundaryMargin: const EdgeInsets.all(2000.0),
+                  minScale: 0.5,
+                  transformationController: transformationController,
+                  maxScale: 3.0,
+                  panEnabled: !ref.watch(draggingStateProvider),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Tło i diagram
+                      Container(
+                        width: 2000,
+                        height: 2000,
+                        color: Colors.grey[200],
+                        child: CustomPaint(
+                          painter: PetriNetPainter(petriNet: petriNetState),
                         ),
                       ),
-                    )
-                  : GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onPanStart: (details) {
-                        if (modeState.editModeType ==
-                            EditModeType.moveElements) {
-                          mover.handleDragStart(details, ref);
-                        }
-                      },
-                      onPanUpdate: (details) {
-                        if (modeState.editModeType ==
-                            EditModeType.moveElements) {
-                          mover.handleDragUpdate(details, ref);
-                        }
-                      },
-                      onPanEnd: (details) {
-                        if (modeState.editModeType ==
-                            EditModeType.moveElements) {
-                          mover.handleDragEnd(ref);
-                        }
-                      },
-                      child: InteractiveViewer(
-                        clipBehavior: Clip.none,
-                        boundaryMargin: const EdgeInsets.all(2000.0),
-                        minScale: 0.5,
-                        transformationController: transformationController,
-                        maxScale: 3.0,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            // Tło i diagram
 
-                            Container(
-                              width: 2000,
-                              height: 2000,
-                              color: Colors.grey[200],
-                              child: CustomPaint(
-                                painter:
-                                    PetriNetPainter(petriNet: petriNetState),
-                              ),
-                            ),
-
-                            if (modeState.simulationMode == true)
-                              ..._buildTransitionButtons(ref),
-                            if (modeState.editModeType ==
-                                EditModeType.addTokens)
-                              const AddSubtractTokensToState(),
-                          ],
-                        ),
-                      ),
-                    ),
+                      if (modeState.simulationMode == true)
+                        ..._buildTransitionButtons(ref),
+                      if (modeState.editModeType == EditModeType.addTokens)
+                        const AddSubtractTokensToState(),
+                    ],
+                  ),
+                  onInteractionStart: (ScaleStartDetails details) {
+                    if (details.pointerCount == 1 &&
+                        modeState.editModeType == EditModeType.moveElements) {
+                      // Konwersja ScaleStartDetails na DragStartDetails
+                      final dragStartDetails = DragStartDetails(
+                        globalPosition: details.focalPoint,
+                        localPosition: details.localFocalPoint,
+                      );
+                      mover.handleDragStart(dragStartDetails, ref);
+                    }
+                  },
+                  onInteractionUpdate: (ScaleUpdateDetails details) {
+                    if (details.pointerCount == 1 &&
+                        details.scale == 1.0 &&
+                        modeState.editModeType == EditModeType.moveElements) {
+                      // Konwersja ScaleUpdateDetails na DragUpdateDetails
+                      final dragUpdateDetails = DragUpdateDetails(
+                        globalPosition: details.focalPoint,
+                        delta: details.focalPointDelta,
+                      );
+                      mover.handleDragUpdate(dragUpdateDetails, ref);
+                    }
+                  },
+                  onInteractionEnd: (ScaleEndDetails details) {
+                    if (modeState.editModeType == EditModeType.moveElements) {
+                      mover.handleDragEnd(ref);
+                    }
+                  },
+                ),
+              ),
             ),
             if (modeState.editModeType == EditModeType.removeElements ||
                 modeState.editModeType == EditModeType.moveElements)
@@ -278,7 +253,7 @@ class PetriNetScreen extends ConsumerWidget {
                       child: Text(
                         modeState.editModeType == EditModeType.removeElements
                             ? "Kliknij na element, który chcesz usunąć"
-                            : "Skalowanie ekranu zablokowane",
+                            : "Przesuń wybrany element",
                         style: const TextStyle(
                           color: Colors.black,
                           fontSize: 16,

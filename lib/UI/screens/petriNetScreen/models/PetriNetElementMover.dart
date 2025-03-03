@@ -23,9 +23,8 @@ class PetriNetElementMover {
             PetriNetUtils.detectTransition(correctedPosition, petriNetState);
 
     if (element != null) {
-      ref
-          .read(petriNetProvider.notifier)
-          .setSelectedElement(element); // 🔹 Ustawienie w Providerze
+      ref.read(draggingStateProvider.notifier).state = true;
+      ref.read(petriNetProvider.notifier).setSelectedElement(element);
     }
   }
 
@@ -53,6 +52,7 @@ class PetriNetElementMover {
   }
 
   void handleDragEnd(WidgetRef ref) {
+    ref.read(draggingStateProvider.notifier).state = false;
     ref.read(petriNetProvider.notifier).updateElementPosition();
     ref.read(petriNetProvider.notifier).setSelectedElement(null);
   }

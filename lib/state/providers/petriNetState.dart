@@ -194,3 +194,6 @@ final petriNetProvider =
     StateNotifierProvider<PetriNetNotifier, PetriNet?>((ref) {
   return PetriNetNotifier();
 });
+
+final draggingStateProvider =
+    StateProvider<bool>((ref) => false); // TODO do osobnego pliku to wyjebac
