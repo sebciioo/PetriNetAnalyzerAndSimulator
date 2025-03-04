@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElementAdder.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElementMover.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElementRemover.dart';
+import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addElementDialog.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addSubtractTokensToState.dart';
 import 'package:petri_net_front/UI/utils/PetriNetUtils.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
@@ -24,10 +26,21 @@ class PetriNetScreen extends ConsumerWidget {
     final transformationController =
         ref.watch(transformationControllerProvider);
 
+    print(petriNetState!.states.length);
     final mover = PetriNetElementMover(
       transformationController: transformationController,
       petriNetState: petriNetState!,
     );
+    final adder = PetriNetElementAdder(
+      transformationController: transformationController,
+      petriNetState: petriNetState!,
+    );
+
+    if (modeState.editModeType == EditModeType.addElements) {
+      Future.delayed(Duration.zero, () {
+        showAddElementDialog(context, adder);
+      });
+    }
 
     void activateTransition(Transition transition, bool isActive) {
       if (isActive) {
@@ -177,6 +190,9 @@ class PetriNetScreen extends ConsumerWidget {
                           .read(petriNetProvider.notifier)
                           .removeArc(clickedElement);
                     }
+                  }
+                  if (modeState.editModeType == EditModeType.addElements) {
+                    adder.addElement(details, ref);
                   }
                 },
                 child: InteractiveViewer(

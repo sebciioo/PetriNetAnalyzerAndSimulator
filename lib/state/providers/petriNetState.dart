@@ -86,6 +86,13 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
       final updatedStates =
           state!.states.where((s) => s != selectedState).toList();
 
+      // Usuwamy tranzycje, które nie mają żadnych połączeń (puste incoming i outgoing arcs)
+      //final cleanedTransitions = updatedTransitions
+      //    .where((transition) =>
+      //        transition.incomingArcs.isNotEmpty ||
+      //        transition.outgoingArcs.isNotEmpty)
+      //    .toList();
+
       //Aktualizacja stanu
       updateState(
           states: updatedStates,
@@ -119,6 +126,12 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
       //Usuwamy tranzycję z listy tranzycji
       final updatedTransitions =
           state!.transitions.where((t) => t != selectedTransition).toList();
+
+      // Usuwamy stan, które nie ma żadnych połączeń (puste incoming i outgoing arcs)
+      //final cleanedStates = updatedStates
+      //    .where((state) =>
+      //        state.incomingArcs.isNotEmpty || state.outgoingArcs.isNotEmpty)
+      //    .toList();
 
       //Aktualizacja stanu
       updateState(
@@ -157,6 +170,19 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
               ))
           .toList();
 
+      // Usuwamy stan, które nie ma żadnych połączeń (puste incoming i outgoing arcs)
+      //final cleanedStates = updatedStates
+      //    .where((state) =>
+      //        state.incomingArcs.isNotEmpty || state.outgoingArcs.isNotEmpty)
+      //   .toList();
+
+      // Usuwamy tranzycje, które nie mają żadnych połączeń (puste incoming i outgoing arcs)
+      //final cleanedTransitions = updatedTransitions
+      //    .where((transition) =>
+      //        transition.incomingArcs.isNotEmpty ||
+      //        transition.outgoingArcs.isNotEmpty)
+      //    .toList();
+
       updateState(
           arcs: updatedArcs,
           states: updatedStates,
@@ -179,7 +205,7 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
       updateState(states: updatedStates);
     } else if (selectedElement is Transition) {
       final List<Transition> updatedTransitions = state!.transitions.map((t) {
-        if (t.start == selectedElement.start && t.end == selectedElement.end) {
+        if (t.label == selectedElement.label) {
           return selectedElement as Transition;
         }
         return t;
@@ -187,6 +213,50 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
 
       updateState(transitions: updatedTransitions);
     }
+  }
+
+  void addState(States newState) {
+    int maxNumber = 0;
+
+    for (var state in state!.states) {
+      String label = state.label!;
+      String numberPart = label.substring(1);
+      int? number = int.tryParse(numberPart);
+      if (number != null && number > maxNumber) {
+        maxNumber = number;
+      }
+    }
+
+    final newLabel = "S${maxNumber + 1}";
+    final newLabeledState = newState.copyWith(label: newLabel);
+
+    final updatedStates = state!.states.map((s) => s.copyWith()).toList()
+      ..add(newLabeledState);
+
+    updateState(states: updatedStates);
+  }
+
+  void addTransition(Transition newTransition) {
+    int maxNumber = 0;
+
+    for (var transition in state!.transitions) {
+      String label = transition.label!;
+      String numberPart = label.substring(1);
+      int? number = int.tryParse(numberPart);
+      if (number != null && number > maxNumber) {
+        maxNumber = number;
+      }
+    }
+
+    final newLabel = "S${maxNumber + 1}";
+    final newLabeledTransition = newTransition.copyWith(label: newLabel);
+
+    final updatedTransitions = state!.transitions
+        .map((s) => s.copyWith())
+        .toList()
+      ..add(newLabeledTransition);
+
+    updateState(transitions: updatedTransitions);
   }
 }
 

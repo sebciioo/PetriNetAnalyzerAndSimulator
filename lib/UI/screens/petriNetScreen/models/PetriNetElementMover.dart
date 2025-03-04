@@ -38,7 +38,6 @@ class PetriNetElementMover {
       final newElement = selectedElement.copyWith(
         center: selectedElement.center + details.delta,
       );
-
       petriNetNotifier.setSelectedElement(newElement);
     } else if (selectedElement is Transition) {
       final newElement = selectedElement.copyWith(
