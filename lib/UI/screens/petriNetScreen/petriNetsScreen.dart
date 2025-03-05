@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElementAdder.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElementMover.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElementRemover.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addElementDialog.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addSubtractTokensToState.dart';
-import 'package:petri_net_front/UI/utils/PetriNetUtils.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/featuresTile.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/managementOption.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/petriNetPainter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:petri_net_front/state/providers/adderState.dart';
 import 'package:petri_net_front/state/providers/modeState.dart';
 import 'package:petri_net_front/state/providers/transformationState.dart';
 import 'package:defer_pointer/defer_pointer.dart';
@@ -31,14 +30,11 @@ class PetriNetScreen extends ConsumerWidget {
       transformationController: transformationController,
       petriNetState: petriNetState!,
     );
-    final adder = PetriNetElementAdder(
-      transformationController: transformationController,
-      petriNetState: petriNetState!,
-    );
-
-    if (modeState.editModeType == EditModeType.addElements) {
+    final adder = ref.watch(petriNetAdderProvider);
+    if (modeState.editModeType == EditModeType.addElements &&
+        adder!.selectedElement == null) {
       Future.delayed(Duration.zero, () {
-        showAddElementDialog(context, adder);
+        showAddElementDialog(context, adder, ref);
       });
     }
 
@@ -192,7 +188,8 @@ class PetriNetScreen extends ConsumerWidget {
                     }
                   }
                   if (modeState.editModeType == EditModeType.addElements) {
-                    adder.addElement(details, ref);
+                    ref.read(petriNetAdderProvider.notifier).addElement(details,
+                        transformationController.value, petriNetState, ref);
                   }
                 },
                 child: InteractiveViewer(
@@ -253,7 +250,9 @@ class PetriNetScreen extends ConsumerWidget {
               ),
             ),
             if (modeState.editModeType == EditModeType.removeElements ||
-                modeState.editModeType == EditModeType.moveElements)
+                modeState.editModeType == EditModeType.moveElements ||
+                (modeState.editModeType == EditModeType.addElements &&
+                    (adder?.selectionMessage.isNotEmpty == true)))
               Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
@@ -269,7 +268,10 @@ class PetriNetScreen extends ConsumerWidget {
                       child: Text(
                         modeState.editModeType == EditModeType.removeElements
                             ? "Kliknij na element, który chcesz usunąć"
-                            : "Przesuń wybrany element",
+                            : modeState.editModeType ==
+                                    EditModeType.moveElements
+                                ? "Przesuń wybrany element"
+                                : adder!.selectionMessage,
                         style: const TextStyle(
                           color: Colors.black,
                           fontSize: 16,

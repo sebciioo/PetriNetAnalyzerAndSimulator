@@ -105,6 +105,20 @@ class Arc {
         label,
         arrowPosition,
       );
+
+  Arc copyWith({
+    Offset? start,
+    Offset? end,
+    String? label,
+    String? arrowPosition,
+  }) {
+    return Arc(
+      start: start ?? this.start,
+      end: end ?? this.end,
+      label: label ?? this.label,
+      arrowPosition: arrowPosition ?? this.arrowPosition,
+    );
+  }
 }
 
 class States {

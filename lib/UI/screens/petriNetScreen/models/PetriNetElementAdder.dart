@@ -6,6 +6,37 @@ import 'package:petri_net_front/state/providers/petriNetState.dart';
 import 'package:widget_arrows/arrows.dart';
 
 class PetriNetElementAdder {
+  final dynamic selectedElement;
+  final dynamic startElement;
+  final dynamic endElement;
+  final String selectionMessage;
+
+  PetriNetElementAdder({
+    this.selectedElement,
+    this.startElement,
+    this.endElement,
+    this.selectionMessage = "",
+  });
+
+  /// 🔥 `copyWith()` pozwala na częściowe aktualizowanie stanu
+  PetriNetElementAdder copyWith({
+    dynamic selectedElement,
+    dynamic startElement,
+    dynamic endElement,
+    String? selectionMessage,
+  }) {
+    return PetriNetElementAdder(
+      selectedElement: selectedElement ?? this.selectedElement,
+      startElement: startElement ?? this.startElement,
+      endElement: endElement ?? this.endElement,
+      selectionMessage: selectionMessage ?? this.selectionMessage,
+    );
+  }
+}
+
+
+/*
+class PetriNetElementAdder {
   PetriNetElementAdder({
     required this.transformationController,
     required this.petriNetState,
@@ -26,6 +57,7 @@ class PetriNetElementAdder {
       final newState = States(center: correctedPosition, tokens: 0);
       ref.read(petriNetProvider.notifier).addState(newState);
       print("🟡 Dodano stan na pozycji: $correctedPosition");
+      selectedElement = null;
     } else if (selectedElement is Transition) {
       final newTransitionPositionStart =
           Offset(correctedPosition.dx, correctedPosition.dy + 35);
@@ -36,15 +68,15 @@ class PetriNetElementAdder {
       ref.read(petriNetProvider.notifier).addTransition(newTransition);
       print(
           "🟨 Dodano tranzycję na pozycji: $newTransitionPositionStart, $newTransitionPositionEnd");
-    } else if (selectedElement is Arrow) {
-      handleArcSelection(scenePosition, ref);
+      selectedElement = null;
+    } else if (selectedElement is Arc) {
+      handleArcSelection(correctedPosition, ref);
       print("➡ Tryb dodawania łuku. Wybierz stan i tranzycję.");
     }
-
-    selectedElement = null; // Resetujemy po dodaniu
   }
 
   void handleArcSelection(Offset scenePosition, WidgetRef ref) {
+    print("tutaj-----------------------------");
     if (startElement == null) {
       // 🔥 Wybieramy pierwszy element (skąd wychodzi łuk)
       startElement = PetriNetUtils.detectState(scenePosition, petriNetState) ??
@@ -72,16 +104,37 @@ class PetriNetElementAdder {
 
   void createArc(WidgetRef ref) {
     if (startElement != null && endElement != null) {
-      final newArc = Arc(
-        start: startElement.center, // 🔥 Pobieramy pozycję startową
-        end: endElement.center, // 🔥 Pobieramy pozycję końcową
-      );
+      // 🔥 Sprawdzamy czy mamy poprawne połączenie (State -> Transition lub Transition -> State)
+      if ((startElement is States && endElement is Transition) ||
+          (startElement is Transition && endElement is States)) {
+        final newArrow = Arc(
+            start: startElement is States
+                ? startElement.center
+                : Offset((startElement.start.dx + startElement.end.dx) / 2,
+                    (startElement.start.dy + startElement.end.dy) / 2),
+            end: endElement is States
+                ? endElement.center
+                : Offset((endElement.start.dx + endElement.end.dx) / 2,
+                    (endElement.start.dy + endElement.end.dy) / 2),
+            arrowPosition: 'end');
 
-      print("➡ Dodano łuk od ${startElement.label} do ${endElement.label}");
+        // 🔥 Dodajemy łuk do providera
+        ref
+            .read(petriNetProvider.notifier)
+            .addArrow(newArrow, startElement, endElement);
 
-      // Resetujemy wybór po dodaniu łuku
-      startElement = null;
-      endElement = null;
+        print("➡ Dodano łuk od ${startElement.label} do ${endElement.label}");
+
+        // 🔥 Resetujemy wybór po dodaniu łuku
+        startElement = null;
+        endElement = null;
+        selectedElement = null;
+      } else {
+        print(
+            "❌ Błąd! Łuk może łączyć tylko State -> Transition lub Transition -> State.");
+      }
     }
   }
 }
+
+*/

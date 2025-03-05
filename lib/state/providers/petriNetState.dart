@@ -258,6 +258,53 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
 
     updateState(transitions: updatedTransitions);
   }
+
+  void addArrow(Arc newArrow, dynamic startElement, dynamic endElement) {
+    final updatedArcs = state!.arcs.map((s) => s.copyWith()).toList()
+      ..add(newArrow);
+
+    if (startElement is States && endElement is Transition) {
+      // Stan -> Tranzycja
+      final updatedStates = state!.states.map((s) {
+        if (s == startElement) {
+          return s.copyWith(outgoingArcs: [...s.outgoingArcs, newArrow]);
+        }
+        return s;
+      }).toList();
+
+      final updatedTransitions = state!.transitions.map((t) {
+        if (t == endElement) {
+          return t.copyWith(incomingArcs: [...t.incomingArcs, newArrow]);
+        }
+        return t;
+      }).toList();
+      updateState(
+          arcs: updatedArcs,
+          states: updatedStates,
+          transitions: updatedTransitions);
+    } else if (startElement is Transition && endElement is States) {
+      // Tranzycja -> Stan
+      final updatedTransitions = state!.transitions.map((t) {
+        if (t == startElement) {
+          return t.copyWith(outgoingArcs: [...t.outgoingArcs, newArrow]);
+        }
+        return t;
+      }).toList();
+
+      final updatedStates = state!.states.map((s) {
+        if (s == endElement) {
+          return s.copyWith(incomingArcs: [...s.incomingArcs, newArrow]);
+        }
+        return s;
+      }).toList();
+
+      updateState(
+          arcs: updatedArcs,
+          states: updatedStates,
+          transitions: updatedTransitions);
+    }
+    print("➡ Dodano nowy łuk od ${newArrow.start} do ${newArrow.end}");
+  }
 }
 
 final petriNetProvider =
