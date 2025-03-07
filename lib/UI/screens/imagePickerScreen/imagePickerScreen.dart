@@ -1,9 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:petri_net_front/backendServer/serverManager.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/state/providers/ImageState.dart';
 import 'package:petri_net_front/state/providers/errorState.dart';
+import 'package:petri_net_front/state/providers/loadingState.dart';
 import 'package:petri_net_front/state/providers/petriNetState.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/imageInput.dart';
@@ -19,9 +21,10 @@ class ImagePickerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final imageState = ref.watch(imageProvider);
-    final petriNetState = ref.watch(petriNetProvider);
     final errorState = ref.watch(errorProvider);
-
+    final loadingState = ref.watch(loadingProvider);
+    print("--------------------------------------------------");
+    print(loadingState);
     void _takePicture() async {
       final imagePicker = ImagePicker();
       final pickedImage = await imagePicker.pickImage(
@@ -47,7 +50,10 @@ class ImagePickerScreen extends ConsumerWidget {
 
     void goToPetriNetScreen(BuildContext context) {
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (ctx) => const PetriNetScreen()),
+        MaterialPageRoute(
+            builder: (ctx) => PetriNetScreen(
+                  serverManager: serverManager,
+                )),
       );
     }
 
@@ -55,12 +61,17 @@ class ImagePickerScreen extends ConsumerWidget {
       final jsonResponse =
           await serverManager.sendImageFromPhoneToServer(imageState!);
 
-      if (!context.mounted) return;
+      if (!context.mounted) {
+        ref.read(loadingProvider.notifier).stopProcessing();
+        return;
+      }
       if (!jsonResponse.containsKey('error')) {
         final PetriNet petriNetResponse = PetriNet.fromJson(jsonResponse);
         ref.read(petriNetProvider.notifier).setPetriNet(petriNetResponse);
+        ref.read(loadingProvider.notifier).stopProcessing();
         goToPetriNetScreen(context);
       } else {
+        ref.read(loadingProvider.notifier).stopProcessing();
         ref.read(errorProvider.notifier).setText(jsonResponse['message']);
       }
     }
@@ -183,11 +194,21 @@ class ImagePickerScreen extends ConsumerWidget {
                                           Theme.of(context).colorScheme.surface,
                                     )
                                   : CustomElevatedButton(
-                                      label: "Gotowe!",
-                                      icon: Icons.check,
-                                      onPressed: () {
-                                        _setPetriNetToProvider(context);
-                                      },
+                                      label: loadingState
+                                          ? "Przetwarzanie..."
+                                          : "Gotowe!",
+                                      icon: loadingState
+                                          ? Icons.hourglass_empty
+                                          : Icons.check,
+                                      onPressed: loadingState
+                                          ? () => {}
+                                          : () {
+                                              ref
+                                                  .read(
+                                                      loadingProvider.notifier)
+                                                  .startProcessing();
+                                              _setPetriNetToProvider(context);
+                                            },
                                       backgroundColor: Theme.of(context)
                                           .colorScheme
                                           .secondary,
@@ -213,11 +234,13 @@ class ImagePickerScreen extends ConsumerWidget {
                                   : CustomElevatedButton(
                                       label: "Usuń zdjęcie",
                                       icon: Icons.delete,
-                                      onPressed: () {
-                                        ref
-                                            .read(imageProvider.notifier)
-                                            .clearImage();
-                                      },
+                                      onPressed: loadingState
+                                          ? () => {}
+                                          : () {
+                                              ref
+                                                  .read(imageProvider.notifier)
+                                                  .clearImage();
+                                            },
                                       backgroundColor: Colors.white,
                                       textColor: Theme.of(context)
                                           .colorScheme

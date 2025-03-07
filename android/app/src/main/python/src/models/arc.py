@@ -1,5 +1,5 @@
 class Arc:
-    def __init__(self, start, end, label=None, arrow_position=None):
+    def __init__(self, start, end, label=None, arrow_position=None, start_state = None, start_transition = None):
         """
         Reprezentuje łuk (strzałkę).
 
@@ -13,8 +13,8 @@ class Arc:
         self.end = end
         self.label = label
         self.arrow_position = arrow_position  # "start", "end" lub None
-        self.start_state = None  # Referencja do stanu (State)
-        self.start_transition = None  # Referencja do tranzycji (Transition)
+        self.start_state = start_state  # Referencja do stanu (State)
+        self.start_transition = start_transition  # Referencja do tranzycji (Transition)
 
     def __str__(self):
         return (
@@ -30,4 +30,17 @@ class Arc:
             "end": [int(coord) for coord in self.end],
             "label": self.label,
             "arrow_position": self.arrow_position,
+            "start_state": self.start_state,
+            "start_transition": self.start_transition
         }
+    
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            start=tuple(data["start"]),
+            end=tuple(data["end"]),
+            label=data.get("label"),
+            arrow_position=data["arrow_position"],
+            start_state = data["start_state"],
+            start_transition = data["start_transition"]
+        )

@@ -3,12 +3,14 @@ import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElement
 import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElementRemover.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addElementDialog.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addSubtractTokensToState.dart';
+import 'package:petri_net_front/backendServer/serverManager.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/featuresTile.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/managementOption.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/petriNetPainter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petri_net_front/state/providers/adderState.dart';
+import 'package:petri_net_front/state/providers/errorState.dart';
 import 'package:petri_net_front/state/providers/modeState.dart';
 import 'package:petri_net_front/state/providers/transformationState.dart';
 import 'package:defer_pointer/defer_pointer.dart';
@@ -16,7 +18,8 @@ import 'package:petri_net_front/data/models/mode.dart';
 import 'package:petri_net_front/state/providers/petriNetState.dart';
 
 class PetriNetScreen extends ConsumerWidget {
-  const PetriNetScreen({super.key});
+  const PetriNetScreen({super.key, required this.serverManager});
+  final ServerManager serverManager;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,7 +28,6 @@ class PetriNetScreen extends ConsumerWidget {
     final transformationController =
         ref.watch(transformationControllerProvider);
 
-    print(petriNetState!.states.length);
     final mover = PetriNetElementMover(
       transformationController: transformationController,
       petriNetState: petriNetState!,
@@ -36,6 +38,18 @@ class PetriNetScreen extends ConsumerWidget {
       Future.delayed(Duration.zero, () {
         showAddElementDialog(context, adder, ref);
       });
+    }
+
+    void _setPetriNetToAnalize(BuildContext context) async {
+      final jsonResponse =
+          await serverManager.sendAnalysisToServer(petriNetState.toJson());
+      if (!jsonResponse.containsKey('error')) {
+        print("DZIAŁA!!!!!!");
+        final PetriNet petriNetResponse = PetriNet.fromJson(jsonResponse);
+        ref.read(petriNetProvider.notifier).setPetriNet(petriNetResponse);
+      } else {
+        ref.read(errorProvider.notifier).setText(jsonResponse['message']);
+      }
     }
 
     void activateTransition(Transition transition, bool isActive) {
@@ -65,6 +79,7 @@ class PetriNetScreen extends ConsumerWidget {
     }
 
     void onTapSimulationButton() {
+      _setPetriNetToAnalize(context);
       ref.read(modeProvider.notifier).setSimulationMode();
     }
 
@@ -112,6 +127,35 @@ class PetriNetScreen extends ConsumerWidget {
           ),
         );
       }).toList();
+    }
+
+    Widget _buildAnalysisResult(String label, dynamic result) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 15, color: Colors.black),
+          ),
+          const SizedBox(width: 6),
+          Row(
+            children: [
+              Text(
+                result is bool ? (result ? "Tak" : "Nie") : result.toString(),
+                style: const TextStyle(fontSize: 15, color: Colors.black),
+              ),
+              const SizedBox(width: 6),
+              Icon(
+                result is bool
+                    ? (result ? Icons.check_circle : Icons.cancel)
+                    : Icons.check_circle,
+                color: result == true ? Colors.green : Colors.red,
+                size: 22,
+              ),
+            ],
+          ),
+        ],
+      );
     }
 
     return Scaffold(
@@ -317,6 +361,27 @@ class PetriNetScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (modeState.simulationMode == true) ...[
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Wyniki analizy sieci:",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _buildAnalysisResult(
+                                      "Bezpieczna:", petriNetState.isSafe),
+                                  _buildAnalysisResult(
+                                      "Żywa:", petriNetState.isLive),
+                                  _buildAnalysisResult(
+                                      "Ograniczona:", petriNetState.isBounded),
+                                ],
+                              ),
+                              /*
                               const FeaturesTile(
                                 title: "Cechy behawioralne",
                                 items: [
@@ -332,6 +397,7 @@ class PetriNetScreen extends ConsumerWidget {
                                   "Analiza połączeń",
                                 ],
                               ),
+                              */
                             ] else
                               ManagementOption(petriNet: petriNetState!),
                           ],

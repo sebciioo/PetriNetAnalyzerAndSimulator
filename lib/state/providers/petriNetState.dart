@@ -14,22 +14,29 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
 
   void setPetriNet(PetriNet petriNetResponse) {
     state = PetriNet(
-      arcs: petriNetResponse.arcs,
-      states: petriNetResponse.states,
-      transitions: petriNetResponse.transitions,
-    );
+        arcs: petriNetResponse.arcs,
+        states: petriNetResponse.states,
+        transitions: petriNetResponse.transitions,
+        isSafe: petriNetResponse.isSafe,
+        isLive: petriNetResponse.isLive,
+        isBounded: petriNetResponse.isBounded);
   }
 
-  void updateState({
-    List<Arc>? arcs,
-    List<States>? states,
-    List<Transition>? transitions,
-  }) {
+  void updateState(
+      {List<Arc>? arcs,
+      List<States>? states,
+      List<Transition>? transitions,
+      bool? isSafe,
+      bool? isLive,
+      dynamic isBounded}) {
     if (state != null) {
       state = PetriNet(
         arcs: arcs ?? state!.arcs,
         states: states ?? state!.states,
         transitions: transitions ?? state!.transitions,
+        isSafe: isSafe ?? state!.isSafe,
+        isLive: isLive ?? state!.isLive,
+        isBounded: isBounded ?? state!.isBounded,
       );
     }
   }

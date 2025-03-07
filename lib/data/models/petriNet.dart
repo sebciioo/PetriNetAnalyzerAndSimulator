@@ -5,19 +5,31 @@ class PetriNet {
   List<States> states;
   List<Transition> transitions;
 
+  bool isSafe;
+  bool isLive;
+  dynamic isBounded;
+
   // Konstruktor z domyślnymi pustymi listami
   PetriNet(
       {this.arcs = const [],
       this.states = const [],
-      this.transitions = const []});
+      this.transitions = const [],
+      this.isSafe = false,
+      this.isLive = false,
+      this.isBounded = false});
 
   factory PetriNet.fromJson(Map<String, dynamic> json) {
+    print("-----------------ANALIZA------------------");
+    print(json['is_bounded']);
     return PetriNet(
       arcs: List<Arc>.from(json['arcs'].map((arc) => Arc.fromJson(arc))),
       states: List<States>.from(
           json['states'].map((state) => States.fromJson(state))),
       transitions: List<Transition>.from(
           json['transitions'].map((tran) => Transition.fromJson(tran))),
+      isSafe: json['is_safe'],
+      isLive: json['is_live'],
+      isBounded: json['is_bounded'],
     );
   }
 
@@ -26,6 +38,9 @@ class PetriNet {
       'arcs': arcs.map((arc) => arc.toJson()).toList(),
       'states': states.map((state) => state.toJson()).toList(),
       'transitions': transitions.map((tran) => tran.toJson()).toList(),
+      'is_safe': isSafe,
+      'is_live': isLive,
+      'is_bounded': isBounded,
     };
   }
 
@@ -39,6 +54,9 @@ PetriNet:
     ${states.map((state) => state.toString()).join('\n    ')}
   Transitions:
     ${transitions.map((tran) => tran.toString()).join('\n    ')}
+  isSafe: ${isSafe != null ? 'Sieć jest bezpieczna' : 'Sieć nie jest bezpieczna'}
+  isLive: ${isLive != null ? 'Sieć jest żywa' : 'Sieć nie jest żywa'}
+  isBounded: ${isBounded != null ? 'Sieć jest ograniczona' : 'Sieć nie jest ograniczona'}
     ''';
   }
 }
@@ -48,10 +66,14 @@ class Arc {
   final Offset end; // Punkt końcowy łuku
   final String? label; // Etykieta łuku
   final String? arrowPosition; // "start", "end" lub null
+  final String startState;
+  final String startTransition;
 
   Arc({
     required this.start,
     required this.end,
+    required this.startState,
+    required this.startTransition,
     this.label,
     this.arrowPosition,
   });
@@ -59,17 +81,18 @@ class Arc {
   // Konwersja z JSON
   factory Arc.fromJson(Map<String, dynamic> json) {
     return Arc(
-      start: Offset(
-        (json['start'][0] as num).toDouble(),
-        (json['start'][1] as num).toDouble(),
-      ),
-      end: Offset(
-        (json['end'][0] as num).toDouble(),
-        (json['end'][1] as num).toDouble(),
-      ),
-      label: json['label'],
-      arrowPosition: json['arrow_position'],
-    );
+        start: Offset(
+          (json['start'][0] as num).toDouble(),
+          (json['start'][1] as num).toDouble(),
+        ),
+        end: Offset(
+          (json['end'][0] as num).toDouble(),
+          (json['end'][1] as num).toDouble(),
+        ),
+        label: json['label'],
+        arrowPosition: json['arrow_position'],
+        startState: json['start_state'],
+        startTransition: json['start_transition']);
   }
 
   // Konwersja do JSON
@@ -79,6 +102,8 @@ class Arc {
       'end': [end.dx, end.dy],
       'label': label,
       'arrow_position': arrowPosition,
+      'start_state': startState,
+      'start_transition': startTransition
     };
   }
 
@@ -100,24 +125,22 @@ class Arc {
   // Nadpisanie hashCode
   @override
   int get hashCode => Object.hash(
-        start,
-        end,
-        label,
-        arrowPosition,
-      );
+      start, end, label, arrowPosition, startState, startTransition);
 
-  Arc copyWith({
-    Offset? start,
-    Offset? end,
-    String? label,
-    String? arrowPosition,
-  }) {
+  Arc copyWith(
+      {Offset? start,
+      Offset? end,
+      String? label,
+      String? arrowPosition,
+      String? startState,
+      String? startTransition}) {
     return Arc(
-      start: start ?? this.start,
-      end: end ?? this.end,
-      label: label ?? this.label,
-      arrowPosition: arrowPosition ?? this.arrowPosition,
-    );
+        start: start ?? this.start,
+        end: end ?? this.end,
+        label: label ?? this.label,
+        arrowPosition: arrowPosition ?? this.arrowPosition,
+        startState: startState ?? this.startState,
+        startTransition: startTransition ?? this.startTransition);
   }
 }
 

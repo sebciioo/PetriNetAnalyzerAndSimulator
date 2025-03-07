@@ -85,7 +85,7 @@ class InitializationService:
             for transition in transitions:
                 start_point = tuple(transition[0][:2])
                 end_point = tuple(transition[0][2:])
-                transition_label = f"S{len(self.PetriNet.transitions) + 1}"
+                transition_label = f"T{len(self.PetriNet.transitions) + 1}"
                 transition = Transition(start_point, end_point, label=transition_label)
                 self.PetriNet.add_transition(transition)
             for arrow in arrows:

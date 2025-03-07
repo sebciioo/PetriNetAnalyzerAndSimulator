@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
 import 'package:http_parser/http_parser.dart';
 import 'dart:async';
 import 'dart:io';
@@ -11,11 +10,9 @@ class FlaskServer {
 
   Future<String> startPythonServer() async {
     try {
-      final result = await platform.invokeMethod('start_server');
-      debugPrint('Serwer Flask został uruchomiony: $result');
+      await platform.invokeMethod('start_server');
       return "Serwer Flask został uruchomiony pomyślnie";
     } catch (e) {
-      debugPrint('Błąd uruchamiania serwera Flask: $e');
       return "Błąd uruchamiania serwera Flask: $e";
     }
   }
@@ -37,10 +34,8 @@ class FlaskServer {
       if (response.statusCode == 200) {
         final responseBody = await response.stream.bytesToString();
         final jsonResponse = jsonDecode(responseBody);
-        print('Upload successful. Server response: $jsonResponse');
         return jsonResponse;
       } else {
-        print('Upload failed with status: ${response.statusCode}');
         return {
           'error': 'Upload failed',
           'statusCode': response.statusCode,
@@ -48,7 +43,35 @@ class FlaskServer {
         };
       }
     } catch (e) {
-      print('Błąd podczas wysyłania obrazu: $e');
+      return {
+        'error': 'Exception occurred',
+        'message': e.toString(),
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> sendAnalysisToServer(
+      Map<String, dynamic> petriNetJson) async {
+    final uri = Uri.parse('http://127.0.0.1:5666/analyze');
+
+    try {
+      final response = await http.post(
+        uri,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(petriNetJson),
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        return jsonResponse;
+      } else {
+        return {
+          'error': 'Analysis failed',
+          'statusCode': response.statusCode,
+          'message': response.body,
+        };
+      }
+    } catch (e) {
       return {
         'error': 'Exception occurred',
         'message': e.toString(),

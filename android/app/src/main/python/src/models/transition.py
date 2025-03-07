@@ -1,4 +1,5 @@
 import numpy as np
+from src.models import Arc
 
 
 class Transition:
@@ -71,10 +72,10 @@ class Transition:
 
                 # Dodaj łuk w zależności od tego, który punkt jest bliżej przecięcia
                 if dist_start < dist_end:
-                    arc.start_transition = transition
+                    arc.start_transition = transition.label
                     self.incoming_arcs.append(arc)
                 else:
-                    arc.start_transition = transition
+                    arc.start_transition = transition.label
                     self.outgoing_arcs.append(arc)
         else:
             # Jeśli brak przecięcia, sprawdź dystans
@@ -95,10 +96,10 @@ class Transition:
             if min_distance <= threshold:
                 # Dodaj łuk w zależności od tego, który punkt jest bliżej
                 if distances[0] < distances[1]:
-                    arc.start_transition = transition
+                    arc.start_transition = transition.label
                     self.incoming_arcs.append(arc)
                 else:
-                    arc.start_transition = transition
+                    arc.start_transition = transition.label
                     self.outgoing_arcs.append(arc)
 
     def __str__(self):
@@ -115,3 +116,13 @@ class Transition:
             "incoming_arcs": [arc.to_dict() for arc in self.incoming_arcs],
             "outgoing_arcs": [arc.to_dict() for arc in self.outgoing_arcs],
         }
+    
+    @classmethod
+    def from_dict(cls, data):
+        start=tuple(data["start"])
+        end=tuple(data["end"])
+        label = data["label"]
+        transition = cls(start=start, end=end, label=label)
+        transition.incoming_arcs = [Arc.from_dict(arc) for arc in data.get("incoming_arcs", [])]
+        transition.outgoing_arcs = [Arc.from_dict(arc) for arc in data.get("outgoing_arcs", [])]
+        return transition

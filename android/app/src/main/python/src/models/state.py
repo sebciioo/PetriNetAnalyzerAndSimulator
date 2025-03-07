@@ -1,5 +1,5 @@
 import math
-
+from src.models import Arc
 import cv2
 import numpy as np
 
@@ -65,10 +65,10 @@ class State:
 
         # Sprawdź, który punkt jest bliżej stanu i przypisz łuk odpowiednio
         if dist_to_start <= distance_threshold+radius:
-            arc.start_state = state
+            arc.start_state = state.label
             self.incoming_arcs.append(arc)
         elif dist_to_end <= distance_threshold+radius:
-            arc.start_state = state
+            arc.start_state = state.label
             self.outgoing_arcs.append(arc)
 
     def assign_tokens(self, tokens):
@@ -80,7 +80,7 @@ class State:
 
     def __str__(self):
         return (
-            f"State(center={self.center}, radius={self.radius}, marking={self.tokens}, label={self.label}, "
+            f"State(center={self.center}, radius={self.radius}, tokens={self.tokens}, label={self.label}, "
             f"incoming={len(self.incoming_arcs)}, outgoing={len(self.outgoing_arcs)})"
         )
 
@@ -93,3 +93,15 @@ class State:
             "incoming_arcs": [arc.to_dict() for arc in self.incoming_arcs],
             "outgoing_arcs": [arc.to_dict() for arc in self.outgoing_arcs],
         }
+    
+    @classmethod
+    def from_dict(cls, data):
+        center = tuple(data["center"])
+        radius = data["radius"]
+        tokens = data["tokens"]
+        label = data["label"]
+        state = cls(center=center, radius=radius, tokens=tokens, label=label)
+        state.incoming_arcs = [Arc.from_dict(arc) for arc in data.get("incoming_arcs", [])]
+        state.outgoing_arcs = [Arc.from_dict(arc) for arc in data.get("outgoing_arcs", [])]
+        return state
+

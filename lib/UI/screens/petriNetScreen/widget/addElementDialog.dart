@@ -37,9 +37,11 @@ void showAddElementDialog(
             ElevatedButton(
               onPressed: () {
                 ref.read(petriNetAdderProvider.notifier).updateSelectedElement(
-                      Arc(start: const Offset(0, 0), end: const Offset(0, 0)),
-                    );
-
+                    Arc(
+                        start: const Offset(0, 0),
+                        end: const Offset(0, 0),
+                        startState: 'Sx',
+                        startTransition: 'Tx'));
                 Navigator.of(context).pop();
               },
               child: const Text("➡ Łuk"),

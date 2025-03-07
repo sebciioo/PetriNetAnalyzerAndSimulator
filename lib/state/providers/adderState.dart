@@ -124,20 +124,25 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
   void createArc(WidgetRef ref) {
     if (state.startElement != null && state.endElement != null) {
       final newArrow = Arc(
-        start: state.startElement is States
-            ? state.startElement.center
-            : Offset(
-                (state.startElement.start.dx + state.startElement.end.dx) / 2,
-                (state.startElement.start.dy + state.startElement.end.dy) / 2,
-              ),
-        end: state.endElement is States
-            ? state.endElement.center
-            : Offset(
-                (state.endElement.start.dx + state.endElement.end.dx) / 2,
-                (state.endElement.start.dy + state.endElement.end.dy) / 2,
-              ),
-        arrowPosition: 'end',
-      );
+          start: state.startElement is States
+              ? state.startElement.center
+              : Offset(
+                  (state.startElement.start.dx + state.startElement.end.dx) / 2,
+                  (state.startElement.start.dy + state.startElement.end.dy) / 2,
+                ),
+          end: state.endElement is States
+              ? state.endElement.center
+              : Offset(
+                  (state.endElement.start.dx + state.endElement.end.dx) / 2,
+                  (state.endElement.start.dy + state.endElement.end.dy) / 2,
+                ),
+          arrowPosition: 'end',
+          startState: state.startElement is States
+              ? state.startElement.label
+              : state.endElement.label,
+          startTransition: state.endElement is Transition
+              ? state.endElement.label
+              : state.startElement.label);
 
       ref
           .read(petriNetProvider.notifier)

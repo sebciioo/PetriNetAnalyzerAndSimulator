@@ -15,4 +15,10 @@ class ServerManager {
     final jsonResponse = await flaskServer.sendImageToServer(imageFile);
     return jsonResponse;
   }
+
+  Future<Map<String, dynamic>> sendAnalysisToServer(
+      Map<String, dynamic> petriNetJson) async {
+    final jsonResponse = await flaskServer.sendAnalysisToServer(petriNetJson);
+    return jsonResponse;
+  }
 }

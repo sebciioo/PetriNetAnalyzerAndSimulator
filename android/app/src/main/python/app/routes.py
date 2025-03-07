@@ -56,14 +56,34 @@ def process_image():
         print(file_path)
         initializer = InitializationService(file_path)
         petri_net = initializer.process_image()
+        petri_net.analyze()
         petri_net_json = petri_net.to_dict()
-        # Ładne formatowanie JSON w konsoli
         return jsonify(petri_net_json)
     except Exception as e:
         print(e);
         return jsonify({"error": str(e)}), 500
 
 
+@bp.route('/analyze', methods=['POST'])
+def analyze_petri_net():
+    """
+    Otrzymuje JSON z siecią Petri, wykonuje ponowną analizę i zwraca wyniki.
+    """
+    try:
+        petri_net_json = request.get_json()
+        if not petri_net_json:
+            return jsonify({"error": "No JSON data provided"}), 400
+        petri_net = PetriNet.from_dict(petri_net_json)
+        petri_net.analyze()
+        updated_petri_net_json = petri_net.to_dict()
+        return jsonify(updated_petri_net_json)
+
+    except Exception as e:
+        print(f"❌ Błąd: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+'''
 @bp.route("/")
 def hello():
     print("Testuje opencv")
@@ -79,4 +99,4 @@ def hello():
         return "Nie znaleziono obrazu w folderze data/", 404
     height, width, channels = image.shape
     return f"Obraz załadowany: Wymiary {width}x{height}, Kanały: {channels}. OpenCV działa poprawnie"
-
+'''
