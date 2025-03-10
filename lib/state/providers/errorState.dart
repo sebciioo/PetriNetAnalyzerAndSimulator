@@ -5,7 +5,7 @@ class ErrorStateNotifier extends StateNotifier<String?> {
   ErrorStateNotifier() : super(null);
 
   void setText(String text) {
-    state = 'Błąd serwera spróbuj ponowanie!';
+    state = text;
   }
 }
 

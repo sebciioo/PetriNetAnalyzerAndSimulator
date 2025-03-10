@@ -1,3 +1,4 @@
+import base64
 from src.models.PetriNet import PetriNet
 from src.detection import detect_circle, detect_arrow, DigitRecognizer
 import numpy as np
@@ -27,36 +28,16 @@ class InitializationService:
         self.detect_states()
         self.detect_arrow_with_transition()
         self.detect_token()
-        self.save_image_in_pictures(self.image, "original_image3.png")
+        self.clean_invalid_arcs()
+        #self.save_image_in_pictures(self.image, "original_image3.png")
         return self.PetriNet
     
-    def save_image_in_pictures(self, image, filename="original_image.png"):
+    def image_to_base64(self):
         """
-        Zapisuje obraz w publicznym katalogu Pictures urządzenia.
+        Konwertuje obraz OpenCV (numpy array) na Base64.
         """
-        try:
-            # Pobierz ścieżkę do katalogu Pictures
-            pictures_dir = os.path.join(os.environ.get("EXTERNAL_STORAGE", "/sdcard"), "Pictures")
-            os.makedirs(pictures_dir, exist_ok=True)
-
-            # Pełna ścieżka do pliku
-            file_path = os.path.join(pictures_dir, filename)
-
-            # Diagnostyka
-            print(f"Ścieżka do zapisu: {file_path}")
-            print(f"Typ obrazu: {type(image)}")
-            print(f"Rozmiar obrazu: {image.shape if isinstance(image, np.ndarray) else 'N/A'}")
-            print(f"Dane obrazu (pierwsze 5 pikseli): {image.flat[:5] if isinstance(image, np.ndarray) else 'N/A'}")
-
-            # Zapisz obraz
-            success = cv2.imwrite(file_path, image)
-            if success:
-                print(f"Obraz zapisany w: {file_path}")
-            else:
-                print("Nie udało się zapisać obrazu. OpenCV zwróciło False.")
-        except Exception as e:
-            print(f"Błąd podczas zapisywania obrazu: {e}")
-
+        _, buffer = cv2.imencode('.png', self.image)  # Kodowanie do formatu PNG
+        return base64.b64encode(buffer).decode('utf-8')  # Konwersja na Base64
 
 
     def detect_states(self):
@@ -122,3 +103,19 @@ class InitializationService:
                 digit = recognizer.analyze_and_predict_digit(cropped_circle, self.processed_image, self.image)
                 if digit is not None:
                     circle.tokens = digit
+
+    def clean_invalid_arcs(self):
+        """
+        Usuwa łuki, które mają None w start_state lub start_transition.
+        Aktualizuje również listy incoming_arcs i outgoing_arcs w stanach i tranzycjach.
+        """
+        valid_arcs = [arc for arc in self.PetriNet.arcs if arc.start_state is not None and arc.start_transition is not None]
+        self.PetriNet.arcs = valid_arcs
+        for state in self.PetriNet.states:
+            state.incoming_arcs = [arc for arc in state.incoming_arcs if arc in valid_arcs ]
+            state.outgoing_arcs = [arc for arc in state.outgoing_arcs if arc in valid_arcs ]
+        for transition in self.PetriNet.transitions:
+            transition.incoming_arcs = [arc for arc in transition.incoming_arcs if arc in valid_arcs ]
+            transition.outgoing_arcs = [arc for arc in transition.outgoing_arcs if arc in valid_arcs ]
+
+

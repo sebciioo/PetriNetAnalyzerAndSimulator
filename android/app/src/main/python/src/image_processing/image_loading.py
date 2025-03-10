@@ -2,21 +2,25 @@ from src import cv2, np
 import os
 
 
-def load_image(filename, target_width=600, tolerance=20):
-    """Ładuje obraz z zadaną ścieżką."""
+def load_image(filename, target_size=600, tolerance=20):
+    """Ładuje obraz z zadaną ścieżką i dostosowuje rozmiar w zależności od orientacji."""
     image = cv2.imread(filename)
 
     if image is None:
         raise ValueError(f"Nie udało się załadować obrazu z: {filename}")
-
     height, width = image.shape[:2]
-    print(height, width)
-    if width > target_width+tolerance or width > target_width-tolerance:
-        print(1213)
-        aspect_ratio = height / width
-        target_height = int(target_width * aspect_ratio)
-        resized_image = cv2.resize(image, (target_width, target_height), interpolation=cv2.INTER_AREA)
-        print(target_height, target_width)
-        return resized_image
-    else:
-        return image
+    if width > height:  # Obraz poziomy
+        if not (target_size - tolerance <= width <= target_size + tolerance):
+            aspect_ratio = height / width
+            target_height = int(target_size * aspect_ratio)
+            resized_image = cv2.resize(image, (target_size, target_height), interpolation=cv2.INTER_AREA)
+            print(f"Zmienione wymiary: {target_size}x{target_height}")
+            return resized_image
+    else:  # Obraz pionowy
+        if not (target_size - tolerance <= height <= target_size + tolerance):
+            aspect_ratio = width / height
+            target_width = int(target_size * aspect_ratio)
+            resized_image = cv2.resize(image, (target_width, target_size), interpolation=cv2.INTER_AREA)
+            print(f"Zmienione wymiary: {target_width}x{target_size}")
+            return resized_image
+    return image

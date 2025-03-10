@@ -8,14 +8,12 @@ class PetriNetAnalyzer:
         if petriNet is None:
             raise ValueError("Przekazana sieć Petriego jest None")
         
-        # Sprawdź, czy wszystkie stany mają poprawne atrybuty
-        for state in petriNet.states:
-            if state is None:
-                raise ValueError("Jeden ze stanów w sieci jest None")
+        print("-----------------------------0.4--------------")
         self.petri_net = petriNet
+        print("-----------------------------0.5--------------")
         self.initial_marking = self.get_marking()
+        print("-----------------------------0.6--------------")
         self.coverability_graph = self.compute_coverability_graph()
- 
 
     def get_marking(self):
         """

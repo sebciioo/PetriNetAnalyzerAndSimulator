@@ -57,7 +57,12 @@ def process_image():
         initializer = InitializationService(file_path)
         petri_net = initializer.process_image()
         petri_net.analyze()
+        if initializer.image  is not None:
+            image_base64 = initializer.image_to_base64()
+        else:
+            image_base64 = None
         petri_net_json = petri_net.to_dict()
+        petri_net_json["processed_image"] = image_base64
         return jsonify(petri_net_json)
     except Exception as e:
         print(e);

@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:petri_net_front/backendServer/serverManager.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
@@ -23,8 +23,7 @@ class ImagePickerScreen extends ConsumerWidget {
     final imageState = ref.watch(imageProvider);
     final errorState = ref.watch(errorProvider);
     final loadingState = ref.watch(loadingProvider);
-    print("--------------------------------------------------");
-    print(loadingState);
+
     void _takePicture() async {
       final imagePicker = ImagePicker();
       final pickedImage = await imagePicker.pickImage(
@@ -57,19 +56,95 @@ class ImagePickerScreen extends ConsumerWidget {
       );
     }
 
+    void _showImageDialog(BuildContext context, String base64Image) {
+      Uint8List imageBytes = base64Decode(base64Image);
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "Podgląd przetworzonego obrazu",
+                    style: TextStyle(
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.memory(
+                      imageBytes,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: CustomElevatedButton(
+                          label: "Anuluj",
+                          icon: Icons.remove,
+                          onPressed: () => Navigator.of(context).pop(),
+                          backgroundColor: Colors.white,
+                          textColor:
+                              Theme.of(context).colorScheme.inverseSurface,
+                          borderColor: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 25,
+                      ),
+                      Expanded(
+                        child: CustomElevatedButton(
+                          label: "Kontynuuj",
+                          icon: Icons.arrow_right_rounded,
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            goToPetriNetScreen(context);
+                          },
+                          backgroundColor:
+                              Theme.of(context).colorScheme.secondary,
+                          textColor: Theme.of(context).colorScheme.surface,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     void _setPetriNetToProvider(BuildContext context) async {
       final jsonResponse =
           await serverManager.sendImageFromPhoneToServer(imageState!);
-
       if (!context.mounted) {
         ref.read(loadingProvider.notifier).stopProcessing();
         return;
       }
       if (!jsonResponse.containsKey('error')) {
         final PetriNet petriNetResponse = PetriNet.fromJson(jsonResponse);
+        final String base64Image = jsonResponse['processed_image'];
         ref.read(petriNetProvider.notifier).setPetriNet(petriNetResponse);
         ref.read(loadingProvider.notifier).stopProcessing();
-        goToPetriNetScreen(context);
+        _showImageDialog(context, base64Image);
+        //goToPetriNetScreen(context);
       } else {
         ref.read(loadingProvider.notifier).stopProcessing();
         ref.read(errorProvider.notifier).setText(jsonResponse['message']);

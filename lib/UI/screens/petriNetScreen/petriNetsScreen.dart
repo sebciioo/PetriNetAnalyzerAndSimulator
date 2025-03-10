@@ -32,6 +32,7 @@ class PetriNetScreen extends ConsumerWidget {
       transformationController: transformationController,
       petriNetState: petriNetState!,
     );
+
     final adder = ref.watch(petriNetAdderProvider);
     if (modeState.editModeType == EditModeType.addElements &&
         adder!.selectedElement == null) {
@@ -44,7 +45,6 @@ class PetriNetScreen extends ConsumerWidget {
       final jsonResponse =
           await serverManager.sendAnalysisToServer(petriNetState.toJson());
       if (!jsonResponse.containsKey('error')) {
-        print("DZIAŁA!!!!!!");
         final PetriNet petriNetResponse = PetriNet.fromJson(jsonResponse);
         ref.read(petriNetProvider.notifier).setPetriNet(petriNetResponse);
       } else {

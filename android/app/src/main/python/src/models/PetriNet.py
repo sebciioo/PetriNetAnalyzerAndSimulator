@@ -36,17 +36,10 @@ class PetriNet:
         """
         🔥 Tworzy `PetriNetAnalyzer`, analizuje sieć i zapisuje wyniki.
         """
-        print("---------------------------0------------------")
-        for state in self.states:
-            print(state)
         analyzer = PetriNetAnalyzer(copy.deepcopy(self))
-        print("---------------------------1------------------")
         self.is_safe = analyzer.safe()
-        print("---------------------------2------------------")
         self.is_live = analyzer.live()
-        print("---------------------------3------------------")
         self.is_bounded = int(analyzer.bounded()) if analyzer.bounded() is not False else False
-        print("---------------------------4------------------")
 
 
 
@@ -71,26 +64,10 @@ class PetriNet:
         """
         Tworzy obiekt PetriNet na podstawie słownika JSON.
         """
-        print("-------------------W TUTAJ JSON -------------------------")
-        print(json.dumps(data, indent=2))  # 🔥 WYŚWIETLA CAŁY JSON DLA DEBUGU
-        
         petri_net = cls()
-        
-        print("📌 Przekazywane do State.from_dict():")
         petri_net.states = [State.from_dict(state) for state in data["states"]]
-
-        print("📌 Przekazywane do Transition.from_dict():")
-
         petri_net.transitions = [Transition.from_dict(tr) for tr in data["transitions"]]
-
-        print("📌 Przekazywane do Arc.from_dict():")
-        petri_net.arcs = [Arc.from_dict(arc) for arc in data["arcs"]]
-
-        print("📌 Wartości cech:")
-        print("🔹 is_safe:", data.get("is_safe", None))
-        print("🔹 is_live:", data.get("is_live", None))
-        print("🔹 is_bounded:", data.get("is_bounded", None))
-        
+        petri_net.arcs = [Arc.from_dict(arc) for arc in data["arcs"]] 
         petri_net.is_safe = data["is_safe"]
         petri_net.is_live = data["is_live"]
         petri_net.is_bounded = data["is_bounded"]

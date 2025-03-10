@@ -36,7 +36,7 @@ class PetriNetPainter extends CustomPainter {
       canvas.drawCircle(state.center, constStateRadius, statePaint);
 
       // Rysowanie etykiety stanu
-      if (false) {
+      if (true) {
         textPainter.text = TextSpan(text: state.label, style: textStyle);
         textPainter.layout();
         textPainter.paint(
@@ -100,7 +100,7 @@ class PetriNetPainter extends CustomPainter {
       canvas.drawLine(start, end, transitionPaint);
 
       // Rysowanie etykiety tranzycji
-      if (false) {
+      if (true) {
         textPainter.text = TextSpan(text: transition.label, style: textStyle);
         textPainter.layout();
         textPainter.paint(
