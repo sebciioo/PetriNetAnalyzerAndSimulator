@@ -24,7 +24,7 @@ def find_line(image, circles, rho=1, threshold=80, minLength=55, maxGap=25):
     return linesP
 
 
-def detect_arrow(long_lines, image, circles, radius_threshold=30):
+def detect_arrow_and_transition(long_lines, image, circles, radius_threshold=30):
     filtered_lines = filter_lines(long_lines)
     draw_lines(filtered_lines, image)
 

@@ -107,6 +107,14 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
               selectionMessage: 'Nie można łączyć 2 tych samych elementów!');
           return;
         }
+        if (arcExists(state.startElement, selected)) {
+          updateState(
+              endElement: null,
+              startElement: null,
+              selectedElement: null,
+              selectionMessage: 'To połączenie już istnieje.');
+          return;
+        }
         createArc(ref);
       } else {
         print("❌ Kliknięto w pustą przestrzeń.");
@@ -153,6 +161,18 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
 
       resetSelection();
     }
+  }
+
+  bool arcExists(dynamic startElement, dynamic selectedElement) {
+    final selectedLabel = selectedElement.label;
+
+    return startElement.outgoingArcs.any((arc) {
+      if (startElement is States) {
+        return arc.startTransition == selectedLabel;
+      } else {
+        return arc.startState == selectedLabel;
+      }
+    });
   }
 }
 

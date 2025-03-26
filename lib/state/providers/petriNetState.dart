@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../data/models/petriNet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,8 +17,9 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
         states: petriNetResponse.states,
         transitions: petriNetResponse.transitions,
         isSafe: petriNetResponse.isSafe,
-        isLive: petriNetResponse.isLive,
-        isBounded: petriNetResponse.isBounded);
+        isBounded: petriNetResponse.isBounded,
+        isPure: petriNetResponse.isPure,
+        isConnected: petriNetResponse.isConnected);
   }
 
   void updateState(
@@ -27,16 +27,18 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
       List<States>? states,
       List<Transition>? transitions,
       bool? isSafe,
-      bool? isLive,
-      dynamic isBounded}) {
+      dynamic isBounded,
+      bool? isPure,
+      bool? isConnected}) {
     if (state != null) {
       state = PetriNet(
         arcs: arcs ?? state!.arcs,
         states: states ?? state!.states,
         transitions: transitions ?? state!.transitions,
         isSafe: isSafe ?? state!.isSafe,
-        isLive: isLive ?? state!.isLive,
         isBounded: isBounded ?? state!.isBounded,
+        isPure: isPure ?? state!.isPure,
+        isConnected: isConnected ?? state!.isConnected,
       );
     }
   }

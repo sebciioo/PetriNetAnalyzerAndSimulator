@@ -3,9 +3,9 @@ import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElement
 import 'package:petri_net_front/UI/screens/petriNetScreen/models/PetriNetElementRemover.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addElementDialog.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/addSubtractTokensToState.dart';
+import 'package:petri_net_front/UI/screens/petriNetScreen/widget/emptyNetDialog.dart';
 import 'package:petri_net_front/backendServer/serverManager.dart';
 import 'package:petri_net_front/data/models/petriNet.dart';
-import 'package:petri_net_front/UI/screens/petriNetScreen/widget/featuresTile.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/managementOption.dart';
 import 'package:petri_net_front/UI/screens/petriNetScreen/widget/petriNetPainter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,7 +56,7 @@ class PetriNetScreen extends ConsumerWidget {
       if (isActive) {
         for (final arc in transition.incomingArcs) {
           final relatedStates =
-              petriNetState!.states.where((s) => s.outgoingArcs.contains(arc));
+              petriNetState.states.where((s) => s.outgoingArcs.contains(arc));
           for (final state in relatedStates) {
             if (state.tokens > 0) {
               ref.read(petriNetProvider.notifier).removeToken(state);
@@ -66,7 +66,7 @@ class PetriNetScreen extends ConsumerWidget {
         }
         for (final arc in transition.outgoingArcs) {
           final relatedStates =
-              petriNetState!.states.where((s) => s.incomingArcs.contains(arc));
+              petriNetState.states.where((s) => s.incomingArcs.contains(arc));
           for (final state in relatedStates) {
             ref.read(petriNetProvider.notifier).addToken(state);
           }
@@ -79,13 +79,16 @@ class PetriNetScreen extends ConsumerWidget {
     }
 
     void onTapSimulationButton() {
+      if (petriNetState.states.isEmpty && petriNetState.transitions.isEmpty) {
+        showEmptyNetDialog(context);
+        return;
+      }
       _setPetriNetToAnalize(context);
       ref.read(modeProvider.notifier).setSimulationMode();
     }
 
-    // Funkcja generująca dynamiczne przyciski
     List<Widget> _buildTransitionButtons(WidgetRef ref) {
-      return petriNetState!.transitions.map((transition) {
+      return petriNetState.transitions.map((transition) {
         final Offset rawPosition = Offset(
           (transition.start.dx + transition.end.dx) / 2,
           (transition.start.dy + transition.end.dy) / 2,
@@ -94,11 +97,14 @@ class PetriNetScreen extends ConsumerWidget {
         const double buttonSize = 50.0;
 
         // Sprawdzamy, czy tranzycja jest aktywna
-        final isActive = transition.incomingArcs.every((arc) {
-          final relatedStates =
-              petriNetState.states.where((s) => s.outgoingArcs.contains(arc));
-          return relatedStates.any((state) => state.tokens >= 1);
-        });
+        final isActive = (transition.incomingArcs.isNotEmpty ||
+                transition.outgoingArcs.isNotEmpty) &&
+            transition.incomingArcs.every((arc) {
+              final relatedStates = petriNetState.states.where(
+                (s) => s.outgoingArcs.contains(arc),
+              );
+              return relatedStates.any((state) => state.tokens >= 1);
+            });
 
         if (!isActive) return const SizedBox.shrink();
 
@@ -130,31 +136,36 @@ class PetriNetScreen extends ConsumerWidget {
     }
 
     Widget _buildAnalysisResult(String label, dynamic result) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 15, color: Colors.black),
-          ),
-          const SizedBox(width: 6),
-          Row(
-            children: [
-              Text(
-                result is bool ? (result ? "Tak" : "Nie") : result.toString(),
-                style: const TextStyle(fontSize: 15, color: Colors.black),
-              ),
-              const SizedBox(width: 6),
-              Icon(
-                result is bool
-                    ? (result ? Icons.check_circle : Icons.cancel)
-                    : Icons.check_circle,
-                color: result == true ? Colors.green : Colors.red,
-                size: 22,
-              ),
-            ],
-          ),
-        ],
+      return Padding(
+        padding: const EdgeInsets.only(right: 10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(fontSize: 15, color: Colors.black),
+            ),
+            const SizedBox(width: 6),
+            Row(
+              children: [
+                Text(
+                  result is bool ? (result ? "Tak" : "Nie") : result.toString(),
+                  style: const TextStyle(fontSize: 15, color: Colors.black),
+                ),
+                const SizedBox(width: 6),
+                Icon(
+                  result is bool
+                      ? (result ? Icons.check_circle : Icons.cancel)
+                      : Icons.check_circle,
+                  color: result is bool
+                      ? (result ? Colors.green : Colors.red)
+                      : Colors.green,
+                  size: 22,
+                ),
+              ],
+            ),
+          ],
+        ),
       );
     }
 
@@ -210,10 +221,9 @@ class PetriNetScreen extends ConsumerWidget {
                   if (modeState.editModeType == EditModeType.removeElements) {
                     final remover = PetriNetElementRemover(
                       transformationController: transformationController,
-                      petriNetState: petriNetState!,
+                      petriNetState: petriNetState,
                     );
                     final clickedElement = remover.handleTap(details);
-
                     if (clickedElement is States) {
                       print('❌ Usunięto stan');
                       ref
@@ -376,30 +386,15 @@ class PetriNetScreen extends ConsumerWidget {
                                   _buildAnalysisResult(
                                       "Bezpieczna:", petriNetState.isSafe),
                                   _buildAnalysisResult(
-                                      "Żywa:", petriNetState.isLive),
-                                  _buildAnalysisResult(
                                       "Ograniczona:", petriNetState.isBounded),
+                                  _buildAnalysisResult(
+                                      "Czysta:", petriNetState.isPure),
+                                  _buildAnalysisResult(
+                                      "Spójna:", petriNetState.isConnected),
                                 ],
                               ),
-                              /*
-                              const FeaturesTile(
-                                title: "Cechy behawioralne",
-                                items: [
-                                  "Analiza przepustowości",
-                                  "Sprawdzenie blokowania",
-                                  "Analiza miejsc nadmiarowych",
-                                ],
-                              ),
-                              const FeaturesTile(
-                                title: "Cechy strukturalne",
-                                items: [
-                                  "Analiza ścieżek",
-                                  "Analiza połączeń",
-                                ],
-                              ),
-                              */
                             ] else
-                              ManagementOption(petriNet: petriNetState!),
+                              ManagementOption(petriNet: petriNetState),
                           ],
                         ),
                       ),

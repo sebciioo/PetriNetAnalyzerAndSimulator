@@ -1,18 +1,14 @@
 import math
 from collections import deque, defaultdict
-from src.models import PetriNet
+from src.models import PetriNet, State, Transition
 
 
 class PetriNetAnalyzer:
     def __init__(self, petriNet):
         if petriNet is None:
             raise ValueError("Przekazana sieć Petriego jest None")
-        
-        print("-----------------------------0.4--------------")
         self.petri_net = petriNet
-        print("-----------------------------0.5--------------")
         self.initial_marking = self.get_marking()
-        print("-----------------------------0.6--------------")
         self.coverability_graph = self.compute_coverability_graph()
 
     def get_marking(self):
@@ -102,36 +98,6 @@ class PetriNetAnalyzer:
         self.coverability_graph = {'vertices': V, 'edges': E}
         return self.coverability_graph
 
-    def reversible(self):
-        """
-        Sprawdza, czy graf pokrywalności jest reversible
-        """
-        if not self.coverability_graph:
-            self.compute_coverability_graph()
-
-        initial_marking = tuple(self.initial_marking)
-        reachable_from_all = set()
-
-        # Sprawdź, czy z każdego węzła można dojść do stanu początkowego
-        for marking in self.coverability_graph['vertices']:
-            visited = set()
-            to_visit = deque([marking])
-
-            while to_visit:
-                current = to_visit.popleft()
-                visited.add(current)
-
-                if current == initial_marking:
-                    reachable_from_all.add(marking)
-                    break
-
-                # Przejrzyj wszystkie krawędzie, aby znaleźć dostępne przejścia
-                for edge in self.coverability_graph['edges']:
-                    if edge[0] == current and edge[2] not in visited:
-                        to_visit.append(edge[2])
-
-        # Sieć jest reversible, jeśli z każdego węzła można dojść do stanu początkowego
-        return len(reachable_from_all) == len(self.coverability_graph['vertices'])
 
     def safe(self):
         """
@@ -168,58 +134,58 @@ class PetriNetAnalyzer:
                     return False
                 max_bound = max(max_bound, token)
         return max_bound
-
-    def find_cycles(self):
+    
+    def pure(self):
         """
-        Znajduje wszystkie cykle w grafie pokrywalności i zwraca zbiór tranzycji, które należą do co najmniej jednego cyklu.
+        Sprawdza, czy sieć Petriego jest pure (czyli nie zawiera self-loopów).
+        Przechodzi przez każdy stan i sprawdza, czy ten sam element ma łuki do i z tej samej tranzycji.
         """
-        adjacency_list = defaultdict(list)
-        all_cycles = set()
+        print("Sprawdza czystość");
+        for state in self.petri_net.states:
+            for out_arc in state.outgoing_arcs:
+                transition = out_arc.start_transition
+                for in_arc in state.incoming_arcs:
+                    if in_arc.start_transition == transition:
+                        # Mamy self-loop: stan -> tranzycja -> ten sam stan
+                        print("NIE JEST CZYSTA")
+                        print(state)
+                        print(transition)
+                        return False
+        print("JEST CZYSTA")
+        return True
 
-        # Budowanie listy sąsiedztwa dla grafu pokrywalności
-        for edge in self.coverability_graph['edges']:
-            start, transition, end = edge
-            adjacency_list[start].append((end, transition))
+    def connected(self):
+        """
+        Sprawdza, czy sieć jest spójna (connected),
+        czyli czy istnieje ścieżka nieukierunkowana między każdą parą wierzchołków.
+        """
+        all_nodes = self.petri_net.states + self.petri_net.transitions
 
+        neighbors = {node: set() for node in all_nodes}
+        print("PRzed grafem----------------")
+        for node in all_nodes:
+            for arc in node.outgoing_arcs + node.incoming_arcs:
+                if isinstance(node, State):
+                    neighbor = self.find_transition_by_label(arc.start_transition)
+                else:
+                    neighbor = self.find_state_by_label(arc.start_state)
+
+                if neighbor is not None:
+                    neighbors[node].add(neighbor)
+                    neighbors[neighbor].add(node)
+
+        print("PRzed przeszukwianiem----------------")
         visited = set()
-        path = []
-        transition_path = []
+        stack = [all_nodes[0]]
+        while stack:
+            current = stack.pop()
+            if current not in visited:
+                visited.add(current)
+                stack.extend(neighbors[current] - visited)
 
-        def dfs(node, start_node):
-            """Przeszukiwanie w głąb w poszukiwaniu cykli."""
-            if node in path:
-                # Jeśli znaleziono cykl, zapisujemy go
-                cycle_start = path.index(node)
-                cycle_transitions = transition_path[cycle_start:]
-                all_cycles.update(cycle_transitions)
-                return
+        print("Wszystko git!---------------------")
+        return len(visited) == len(all_nodes)
 
-            # Oznaczamy wierzchołek jako odwiedzony na bieżącej ścieżce
-            path.append(node)
-
-            for neighbor, transition in adjacency_list[node]:
-                transition_path.append(transition)
-                dfs(neighbor, start_node)
-                transition_path.pop()
-
-            # Po wyjściu z DFS usuwamy wierzchołek z bieżącej ścieżki
-            path.pop()
-
-        # Uruchamiamy DFS dla każdego wierzchołka
-        for vertex in self.coverability_graph['vertices']:
-            if vertex not in visited:
-                dfs(vertex, vertex)
-
-        return all_cycles
-
-    def live(self):
-        """
-        Sprawdza, czy sieć Petri jest live.
-        """
-        cycle_transitions = self.find_cycles()
-        all_transitions = {t for t in self.petri_net.transitions}
-        is_live = cycle_transitions == all_transitions
-        return is_live
 
     def display_coverability_graph(self):
         """

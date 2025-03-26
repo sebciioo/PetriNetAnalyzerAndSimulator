@@ -1,6 +1,6 @@
 import base64
 from src.models.PetriNet import PetriNet
-from src.detection import detect_circle, detect_arrow, DigitRecognizer
+from src.detection import detect_circle, detect_arrow_and_transition, DigitRecognizer
 import numpy as np
 from src.detection import find_line
 from src.image_processing import load_image, preprocess_image
@@ -60,7 +60,7 @@ class InitializationService:
     def detect_arrow_with_transition(self):
         lines = find_line(self.processed_image, self.PetriNet.states)
         if lines is not None:
-            arrows, transitions = detect_arrow(lines, self.image, self.PetriNet.states)
+            arrows, transitions = detect_arrow_and_transition(lines, self.image, self.PetriNet.states)
             # Przypiszmy odpowiednie linie do strzałek oraz tranzycji z uwzględniem gdzie jest ich początek - grot
             # a gdzie jest ich koniec brak gortu
             for transition in transitions:

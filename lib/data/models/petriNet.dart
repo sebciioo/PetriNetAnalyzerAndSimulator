@@ -4,9 +4,9 @@ class PetriNet {
   List<Arc> arcs;
   List<States> states;
   List<Transition> transitions;
-
   bool isSafe;
-  bool isLive;
+  bool isPure;
+  bool isConnected;
   dynamic isBounded;
 
   // Konstruktor z domyślnymi pustymi listami
@@ -15,12 +15,13 @@ class PetriNet {
       this.states = const [],
       this.transitions = const [],
       this.isSafe = false,
-      this.isLive = false,
-      this.isBounded = false});
+      this.isBounded = false,
+      this.isPure = false,
+      this.isConnected = false});
 
   factory PetriNet.fromJson(Map<String, dynamic> json) {
     print("-----------------ANALIZA------------------");
-    print(json['is_bounded']);
+    print(json['is_pure']);
     return PetriNet(
       arcs: List<Arc>.from(json['arcs'].map((arc) => Arc.fromJson(arc))),
       states: List<States>.from(
@@ -28,7 +29,8 @@ class PetriNet {
       transitions: List<Transition>.from(
           json['transitions'].map((tran) => Transition.fromJson(tran))),
       isSafe: json['is_safe'],
-      isLive: json['is_live'],
+      isPure: json['is_pure'],
+      isConnected: json['is_connected'],
       isBounded: json['is_bounded'],
     );
   }
@@ -39,8 +41,9 @@ class PetriNet {
       'states': states.map((state) => state.toJson()).toList(),
       'transitions': transitions.map((tran) => tran.toJson()).toList(),
       'is_safe': isSafe,
-      'is_live': isLive,
       'is_bounded': isBounded,
+      'is_pure': isPure,
+      'is_connected': isConnected,
     };
   }
 
@@ -55,7 +58,6 @@ PetriNet:
   Transitions:
     ${transitions.map((tran) => tran.toString()).join('\n    ')}
   isSafe: ${isSafe != null ? 'Sieć jest bezpieczna' : 'Sieć nie jest bezpieczna'}
-  isLive: ${isLive != null ? 'Sieć jest żywa' : 'Sieć nie jest żywa'}
   isBounded: ${isBounded != null ? 'Sieć jest ograniczona' : 'Sieć nie jest ograniczona'}
     ''';
   }

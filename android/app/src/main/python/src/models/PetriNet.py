@@ -20,8 +20,9 @@ class PetriNet:
 
         # Właściwości analizy (domyślnie None, ustawiane po wywołaniu analyze())
         self.is_safe = None
-        self.is_live = None
         self.is_bounded = None
+        self.is_pure = None
+        self.is_connected = None
 
     def add_state(self, state):
         self.states.append(state)
@@ -38,8 +39,9 @@ class PetriNet:
         """
         analyzer = PetriNetAnalyzer(copy.deepcopy(self))
         self.is_safe = analyzer.safe()
-        self.is_live = analyzer.live()
         self.is_bounded = int(analyzer.bounded()) if analyzer.bounded() is not False else False
+        self.is_pure = analyzer.pure()
+        self.is_connected = analyzer.connected()
 
 
 
@@ -52,8 +54,9 @@ class PetriNet:
             "transitions": transitions_list,
             "arcs": arcs_list,
             "is_safe": self.is_safe,
-            "is_live": self.is_live,
             "is_bounded": self.is_bounded,
+            "is_pure": self.is_pure,
+            "is_connected": self.is_connected
         }
         return petri_net_dict
 
@@ -69,6 +72,7 @@ class PetriNet:
         petri_net.transitions = [Transition.from_dict(tr) for tr in data["transitions"]]
         petri_net.arcs = [Arc.from_dict(arc) for arc in data["arcs"]] 
         petri_net.is_safe = data["is_safe"]
-        petri_net.is_live = data["is_live"]
         petri_net.is_bounded = data["is_bounded"]
+        petri_net.is_pure = data["is_pure"]
+        petri_net.is_connected = data["is_connected"]
         return petri_net

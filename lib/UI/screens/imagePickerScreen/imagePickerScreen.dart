@@ -6,6 +6,7 @@ import 'package:petri_net_front/data/models/petriNet.dart';
 import 'package:petri_net_front/state/providers/ImageState.dart';
 import 'package:petri_net_front/state/providers/errorState.dart';
 import 'package:petri_net_front/state/providers/loadingState.dart';
+import 'package:petri_net_front/state/providers/modeState.dart';
 import 'package:petri_net_front/state/providers/petriNetState.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/customElevatedButton.dart';
 import 'package:petri_net_front/UI/screens/imagePickerScreen/widget/imageInput.dart';
@@ -23,6 +24,7 @@ class ImagePickerScreen extends ConsumerWidget {
     final imageState = ref.watch(imageProvider);
     final errorState = ref.watch(errorProvider);
     final loadingState = ref.watch(loadingProvider);
+    final modeState = ref.watch(modeProvider);
 
     void _takePicture() async {
       final imagePicker = ImagePicker();
@@ -170,7 +172,7 @@ class ImagePickerScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0, 70, 0, 0),
+                padding: const EdgeInsetsDirectional.fromSTEB(0, 60, 0, 20),
                 child: Container(
                   width: 250,
                   height: 70,
@@ -209,7 +211,7 @@ class ImagePickerScreen extends ConsumerWidget {
                   child: Center(
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.9,
-                  height: MediaQuery.of(context).size.height * 0.65,
+                  height: MediaQuery.of(context).size.height * 0.7,
                   padding: const EdgeInsets.all(30.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -328,6 +330,29 @@ class ImagePickerScreen extends ConsumerWidget {
                           ],
                         ),
                       ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          final PetriNet emptyPetriNet = PetriNet();
+                          ref
+                              .read(petriNetProvider.notifier)
+                              .setPetriNet(emptyPetriNet);
+                          ref.read(modeProvider.notifier).setEditingMode();
+                          Navigator.of(context).pop();
+                          goToPetriNetScreen(context);
+                        },
+                        child: const Text(
+                          "Przejdź dalej bez zdjęcia.",
+                          style: TextStyle(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF757575),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -357,9 +382,7 @@ class ImagePickerScreen extends ConsumerWidget {
                     ? Container(
                         child: Text(
                           errorState,
-                          style: const TextStyle(
-                              color:
-                                  Colors.red), // Opcjonalnie stylizacja błędu
+                          style: const TextStyle(color: Colors.red),
                         ),
                       )
                     : const SizedBox
