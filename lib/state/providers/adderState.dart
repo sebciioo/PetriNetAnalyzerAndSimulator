@@ -80,11 +80,11 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
     }
   }
 
-  /// 🔥 Obsługa wyboru łuku (pierwszy i drugi klik)
+  /// Obsługa wyboru łuku (pierwszy i drugi klik)
   void handleArcSelection(
       Offset scenePosition, PetriNet petriNetState, WidgetRef ref) {
     if (state.startElement == null) {
-      // 🔥 Wybieramy pierwszy element (skąd wychodzi łuk)
+      // Wybieramy pierwszy element (skąd wychodzi łuk)
       final selected = detectElement(scenePosition, petriNetState);
       if (selected != null) {
         updateState(
@@ -94,7 +94,7 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
         print("❌ Kliknięto w pustą przestrzeń.");
       }
     } else if (state.endElement == null) {
-      // 🔥 Wybieramy drugi element (gdzie łuk ma dochodzić)
+      // Wybieramy drugi element (gdzie łuk ma dochodzić)
       final selected = detectElement(scenePosition, petriNetState);
       if (selected != null) {
         updateState(endElement: selected);

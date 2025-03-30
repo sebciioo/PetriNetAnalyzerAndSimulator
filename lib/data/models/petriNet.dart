@@ -7,6 +7,7 @@ class PetriNet {
   bool isSafe;
   bool isPure;
   bool isConnected;
+  bool isInterrupted;
   dynamic isBounded;
 
   // Konstruktor z domyślnymi pustymi listami
@@ -17,11 +18,12 @@ class PetriNet {
       this.isSafe = false,
       this.isBounded = false,
       this.isPure = false,
+      this.isInterrupted = false,
       this.isConnected = false});
 
   factory PetriNet.fromJson(Map<String, dynamic> json) {
     print("-----------------ANALIZA------------------");
-    print(json['is_pure']);
+    print(json['is_interrupted']);
     return PetriNet(
       arcs: List<Arc>.from(json['arcs'].map((arc) => Arc.fromJson(arc))),
       states: List<States>.from(
@@ -31,6 +33,7 @@ class PetriNet {
       isSafe: json['is_safe'],
       isPure: json['is_pure'],
       isConnected: json['is_connected'],
+      isInterrupted: json['is_interrupted'],
       isBounded: json['is_bounded'],
     );
   }
@@ -43,6 +46,7 @@ class PetriNet {
       'is_safe': isSafe,
       'is_bounded': isBounded,
       'is_pure': isPure,
+      'is_interrupted': isInterrupted,
       'is_connected': isConnected,
     };
   }

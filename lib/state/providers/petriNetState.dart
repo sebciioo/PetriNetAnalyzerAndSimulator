@@ -19,6 +19,7 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
         isSafe: petriNetResponse.isSafe,
         isBounded: petriNetResponse.isBounded,
         isPure: petriNetResponse.isPure,
+        isInterrupted: petriNetResponse.isInterrupted,
         isConnected: petriNetResponse.isConnected);
   }
 
@@ -29,6 +30,7 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
       bool? isSafe,
       dynamic isBounded,
       bool? isPure,
+      bool? isInterrupted,
       bool? isConnected}) {
     if (state != null) {
       state = PetriNet(
@@ -38,6 +40,7 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
         isSafe: isSafe ?? state!.isSafe,
         isBounded: isBounded ?? state!.isBounded,
         isPure: isPure ?? state!.isPure,
+        isInterrupted: isInterrupted ?? state!.isInterrupted,
         isConnected: isConnected ?? state!.isConnected,
       );
     }
@@ -257,7 +260,7 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
       }
     }
 
-    final newLabel = "S${maxNumber + 1}";
+    final newLabel = "T${maxNumber + 1}";
     final newLabeledTransition = newTransition.copyWith(label: newLabel);
 
     final updatedTransitions = state!.transitions

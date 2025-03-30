@@ -383,10 +383,30 @@ class PetriNetScreen extends ConsumerWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 10),
-                                  _buildAnalysisResult(
-                                      "Bezpieczna:", petriNetState.isSafe),
-                                  _buildAnalysisResult(
-                                      "Ograniczona:", petriNetState.isBounded),
+                                  petriNetState.isInterrupted
+                                      ? const Padding(
+                                          padding: EdgeInsets.only(right: 10.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              const Text(
+                                                "Graf pokrywalności\njest zbyt duży!",
+                                                style: const TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.black),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      : Column(
+                                          children: [
+                                            _buildAnalysisResult("Bezpieczna:",
+                                                petriNetState.isSafe),
+                                            _buildAnalysisResult("Ograniczona:",
+                                                petriNetState.isBounded),
+                                          ],
+                                        ),
                                   _buildAnalysisResult(
                                       "Czysta:", petriNetState.isPure),
                                   _buildAnalysisResult(

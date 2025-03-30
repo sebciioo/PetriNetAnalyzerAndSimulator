@@ -112,45 +112,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => goToUploadFile(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.secondary,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: Text(
-                          "Gotowy",
-                          style: TextStyle(
-                            fontSize: MediaQuery.sizeOf(context).width <
-                                    kBreakpointSmall
-                                ? 16.0
-                                : 28.0,
-                            color: Theme.of(context).colorScheme.surface,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50.0), // marginesy z lewej i prawej
+
+                        child: ElevatedButton(
+                          onPressed: () => goToUploadFile(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.secondary,
+                            padding: EdgeInsets.symmetric(vertical: 16),
                           ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    // Przycisk Zaloguj się
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          side: BorderSide(
-                              color: Theme.of(context).colorScheme.secondary),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: Text(
-                          "Instrukcja",
-                          style: TextStyle(
+                          child: Text(
+                            "Gotowy",
+                            style: TextStyle(
                               fontSize: MediaQuery.sizeOf(context).width <
                                       kBreakpointSmall
                                   ? 16.0
                                   : 28.0,
-                              color:
-                                  Theme.of(context).colorScheme.inverseSurface),
+                              color: Theme.of(context).colorScheme.surface,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -160,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Container(
-                  child: Text(serverResponse), // Pusty tekst jako placeholder
+                  child: Text(""), // Pusty tekst jako placeholder
                 ),
               ),
             ],

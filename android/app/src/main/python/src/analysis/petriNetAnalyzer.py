@@ -8,6 +8,7 @@ class PetriNetAnalyzer:
         if petriNet is None:
             raise ValueError("Przekazana sieć Petriego jest None")
         self.petri_net = petriNet
+        self.interrupted = False
         self.initial_marking = self.get_marking()
         self.coverability_graph = self.compute_coverability_graph()
 
@@ -63,7 +64,7 @@ class PetriNetAnalyzer:
         for state, tokens in zip(self.petri_net.states, marking):
             state.tokens = tokens
 
-    def compute_coverability_graph(self, max_nodes=10000, max_depth=1000):
+    def compute_coverability_graph(self, max_nodes=700, max_depth=40):
         """
         Buduje graf pokrywalności zgodnie z algorytmem 3.18
         """
@@ -72,6 +73,7 @@ class PetriNetAnalyzer:
         New = deque([tuple(self.initial_marking)])
 
         depth = 0
+
         while New and len(V) < max_nodes and depth < max_depth:
             current_marking = New.popleft()
 
@@ -95,6 +97,8 @@ class PetriNetAnalyzer:
                     E.add((current_marking, transition, new_marking))
             depth += 1
 
+        if New:
+            self.interrupted = True
         self.coverability_graph = {'vertices': V, 'edges': E}
         return self.coverability_graph
 
@@ -104,22 +108,12 @@ class PetriNetAnalyzer:
         Sprawdza, czy sieć Petri jest bezpieczna (safety).
         Sieć jest bezpieczna, jeśli liczba tokenów w żadnym miejscu nie przekracza 1.
         """
-        try:
-            if "vertices" not in self.coverability_graph:
-                print("❌ Błąd: Brak klucza 'vertices' w coverability_graph!")
-                return None  # Możesz zwrócić None, jeśli nie można określić
-
-            for marking in self.coverability_graph['vertices']:
-                if not isinstance(marking, (list, tuple)):
-                    print(f"❌ Błąd: marking ma niepoprawny typ: {type(marking)}, wartość: {marking}")
-                    return None
-                
-                if any(token > 1 or token == float('inf') for token in marking):
-                    return False
-            return True
-        except Exception as e:
-            print(f"❌ Błąd w safe(): {e}")
-            return None  # Jeśli błąd, zwróć None
+        if self.interrupted:
+            return False
+        for marking in self.coverability_graph['vertices']:  
+            if any(token > 1 or token == float('inf') for token in marking):
+                return False
+        return True
 
 
     def bounded(self):
@@ -127,6 +121,8 @@ class PetriNetAnalyzer:
         Sprawdza, czy sieć Petri jest ograniczona (bounded) oraz zwraca, przez jaką wartość jest ograniczona.
         Jeśli sieć nie jest ograniczona, zwraca informację, że jest nieograniczona.
         """
+        if self.interrupted:
+            return False
         max_bound = 0
         for marking in self.coverability_graph['vertices']:
             for token in marking:
@@ -140,18 +136,15 @@ class PetriNetAnalyzer:
         Sprawdza, czy sieć Petriego jest pure (czyli nie zawiera self-loopów).
         Przechodzi przez każdy stan i sprawdza, czy ten sam element ma łuki do i z tej samej tranzycji.
         """
-        print("Sprawdza czystość");
         for state in self.petri_net.states:
             for out_arc in state.outgoing_arcs:
                 transition = out_arc.start_transition
                 for in_arc in state.incoming_arcs:
                     if in_arc.start_transition == transition:
                         # Mamy self-loop: stan -> tranzycja -> ten sam stan
-                        print("NIE JEST CZYSTA")
                         print(state)
                         print(transition)
                         return False
-        print("JEST CZYSTA")
         return True
 
     def connected(self):
@@ -160,9 +153,7 @@ class PetriNetAnalyzer:
         czyli czy istnieje ścieżka nieukierunkowana między każdą parą wierzchołków.
         """
         all_nodes = self.petri_net.states + self.petri_net.transitions
-
         neighbors = {node: set() for node in all_nodes}
-        print("PRzed grafem----------------")
         for node in all_nodes:
             for arc in node.outgoing_arcs + node.incoming_arcs:
                 if isinstance(node, State):
@@ -174,7 +165,6 @@ class PetriNetAnalyzer:
                     neighbors[node].add(neighbor)
                     neighbors[neighbor].add(node)
 
-        print("PRzed przeszukwianiem----------------")
         visited = set()
         stack = [all_nodes[0]]
         while stack:
@@ -182,8 +172,6 @@ class PetriNetAnalyzer:
             if current not in visited:
                 visited.add(current)
                 stack.extend(neighbors[current] - visited)
-
-        print("Wszystko git!---------------------")
         return len(visited) == len(all_nodes)
 
 

@@ -23,6 +23,7 @@ class PetriNet:
         self.is_bounded = None
         self.is_pure = None
         self.is_connected = None
+        self.is_interrupted = None
 
     def add_state(self, state):
         self.states.append(state)
@@ -38,6 +39,7 @@ class PetriNet:
         🔥 Tworzy `PetriNetAnalyzer`, analizuje sieć i zapisuje wyniki.
         """
         analyzer = PetriNetAnalyzer(copy.deepcopy(self))
+        self.is_interrupted = analyzer.interrupted
         self.is_safe = analyzer.safe()
         self.is_bounded = int(analyzer.bounded()) if analyzer.bounded() is not False else False
         self.is_pure = analyzer.pure()
@@ -56,7 +58,8 @@ class PetriNet:
             "is_safe": self.is_safe,
             "is_bounded": self.is_bounded,
             "is_pure": self.is_pure,
-            "is_connected": self.is_connected
+            "is_connected": self.is_connected,
+            "is_interrupted": self.is_interrupted
         }
         return petri_net_dict
 
@@ -75,4 +78,5 @@ class PetriNet:
         petri_net.is_bounded = data["is_bounded"]
         petri_net.is_pure = data["is_pure"]
         petri_net.is_connected = data["is_connected"]
+        petri_net.is_interrupted = data["is_interrupted"]
         return petri_net
