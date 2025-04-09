@@ -225,17 +225,14 @@ class PetriNetScreen extends ConsumerWidget {
                     );
                     final clickedElement = remover.handleTap(details);
                     if (clickedElement is States) {
-                      print('❌ Usunięto stan');
                       ref
                           .read(petriNetProvider.notifier)
                           .removeState(clickedElement);
                     } else if (clickedElement is Transition) {
-                      print('❌ Usunięto tranzycję');
                       ref
                           .read(petriNetProvider.notifier)
                           .removeTransition(clickedElement);
                     } else if (clickedElement is Arc) {
-                      print('❌ Usunięto łuk');
                       ref
                           .read(petriNetProvider.notifier)
                           .removeArc(clickedElement);

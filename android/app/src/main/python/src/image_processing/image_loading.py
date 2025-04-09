@@ -14,13 +14,11 @@ def load_image(filename, target_size=600, tolerance=20):
             aspect_ratio = height / width
             target_height = int(target_size * aspect_ratio)
             resized_image = cv2.resize(image, (target_size, target_height), interpolation=cv2.INTER_AREA)
-            print(f"Zmienione wymiary: {target_size}x{target_height}")
             return resized_image
     else:  # Obraz pionowy
         if not (target_size - tolerance <= height <= target_size + tolerance):
             aspect_ratio = width / height
             target_width = int(target_size * aspect_ratio)
             resized_image = cv2.resize(image, (target_width, target_size), interpolation=cv2.INTER_AREA)
-            print(f"Zmienione wymiary: {target_width}x{target_size}")
             return resized_image
     return image

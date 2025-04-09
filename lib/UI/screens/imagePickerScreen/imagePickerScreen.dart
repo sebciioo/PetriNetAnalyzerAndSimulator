@@ -24,7 +24,6 @@ class ImagePickerScreen extends ConsumerWidget {
     final imageState = ref.watch(imageProvider);
     final errorState = ref.watch(errorProvider);
     final loadingState = ref.watch(loadingProvider);
-    final modeState = ref.watch(modeProvider);
 
     void _takePicture() async {
       final imagePicker = ImagePicker();
@@ -385,8 +384,7 @@ class ImagePickerScreen extends ConsumerWidget {
                           style: const TextStyle(color: Colors.red),
                         ),
                       )
-                    : const SizedBox
-                        .shrink(), // Puste miejsce, jeśli `errorState` jest `null`
+                    : const SizedBox.shrink(),
               ),
             ],
           ),

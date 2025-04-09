@@ -21,7 +21,7 @@ void showAddElementDialog(
                     );
                 Navigator.of(context).pop();
               },
-              child: const Text("🟡 Stan"),
+              child: const Text("🟡 Miejsce"),
             ),
             ElevatedButton(
               onPressed: () {

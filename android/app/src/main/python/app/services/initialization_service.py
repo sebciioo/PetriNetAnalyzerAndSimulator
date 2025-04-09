@@ -15,7 +15,7 @@ class InitializationService:
     def __init__(self, image):
         # Inicjalizowanie pustej Sieci
         self.PetriNet = PetriNet()
-        # Załaduj i przetwórz obraz
+        # Załadowanie i przetworzenie obrazu
         self.image = load_image(image)
         self.processed_image = preprocess_image(self.image)
         self.files_dir = os.path.join(os.path.dirname(__file__), "data")
@@ -29,7 +29,6 @@ class InitializationService:
         self.detect_arrow_with_transition()
         self.detect_token()
         self.clean_invalid_arcs()
-        #self.save_image_in_pictures(self.image, "original_image3.png")
         return self.PetriNet
     
     def image_to_base64(self):

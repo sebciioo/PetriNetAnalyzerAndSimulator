@@ -17,14 +17,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    startServer(); // Wywołanie metody, która obsłuży asynchroniczną operację
+    startServer();
   }
 
   void startServer() async {
     final response = await widget.serverManager.initializeServer();
     setState(() {
-      serverResponse =
-          response; // Zaktualizowanie stanu po zakończeniu operacji
+      serverResponse = response;
     });
   }
 
@@ -60,7 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              //Nazwa
               Text(
                 "PetriMind",
                 style: TextStyle(
@@ -69,7 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontFamily: 'htr',
                     fontWeight: FontWeight.w500),
               ),
-              // Logo + nagłówek
               Column(
                 children: [
                   CircleAvatar(
@@ -104,8 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              // Przyciski
-              // 3. Przycisk Utwórz konto i Zaloguj się
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Row(
@@ -113,9 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 50.0), // marginesy z lewej i prawej
-
+                        padding: const EdgeInsets.symmetric(horizontal: 50.0),
                         child: ElevatedButton(
                           onPressed: () => goToUploadFile(context),
                           style: ElevatedButton.styleFrom(

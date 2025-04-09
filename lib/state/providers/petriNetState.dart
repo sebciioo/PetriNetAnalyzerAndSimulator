@@ -98,20 +98,11 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
       final updatedStates =
           state!.states.where((s) => s != selectedState).toList();
 
-      // Usuwamy tranzycje, które nie mają żadnych połączeń (puste incoming i outgoing arcs)
-      //final cleanedTransitions = updatedTransitions
-      //    .where((transition) =>
-      //        transition.incomingArcs.isNotEmpty ||
-      //        transition.outgoingArcs.isNotEmpty)
-      //    .toList();
-
       //Aktualizacja stanu
       updateState(
           states: updatedStates,
           transitions: updatedTransitions,
           arcs: updatedArcs);
-
-      print('❌ Usunięto stan oraz powiązane łuki');
     }
   }
 
@@ -139,19 +130,11 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
       final updatedTransitions =
           state!.transitions.where((t) => t != selectedTransition).toList();
 
-      // Usuwamy stan, które nie ma żadnych połączeń (puste incoming i outgoing arcs)
-      //final cleanedStates = updatedStates
-      //    .where((state) =>
-      //        state.incomingArcs.isNotEmpty || state.outgoingArcs.isNotEmpty)
-      //    .toList();
-
       //Aktualizacja stanu
       updateState(
           transitions: updatedTransitions,
           states: updatedStates,
           arcs: updatedArcs);
-
-      print('❌ Usunięto tranzycję oraz powiązane łuki');
     }
   }
 
@@ -182,24 +165,10 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
               ))
           .toList();
 
-      // Usuwamy stan, które nie ma żadnych połączeń (puste incoming i outgoing arcs)
-      //final cleanedStates = updatedStates
-      //    .where((state) =>
-      //        state.incomingArcs.isNotEmpty || state.outgoingArcs.isNotEmpty)
-      //   .toList();
-
-      // Usuwamy tranzycje, które nie mają żadnych połączeń (puste incoming i outgoing arcs)
-      //final cleanedTransitions = updatedTransitions
-      //    .where((transition) =>
-      //        transition.incomingArcs.isNotEmpty ||
-      //        transition.outgoingArcs.isNotEmpty)
-      //    .toList();
-
       updateState(
           arcs: updatedArcs,
           states: updatedStates,
           transitions: updatedTransitions);
-      print('❌ Usunięto łuk globalnie: $selectedArc');
     }
   }
 
@@ -315,7 +284,6 @@ class PetriNetNotifier extends StateNotifier<PetriNet?> {
           states: updatedStates,
           transitions: updatedTransitions);
     }
-    print("➡ Dodano nowy łuk od ${newArrow.start} do ${newArrow.end}");
   }
 }
 

@@ -11,5 +11,4 @@ def main():
     thread = threading.Thread(target=run_server)
     thread.daemon = True
     thread.start()
-    print("Serwer Flask został uruchomiony w tle.")
 

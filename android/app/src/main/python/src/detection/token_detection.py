@@ -72,7 +72,6 @@ class DigitRecognizer:
                 # Przesunięcie współrzędnych keypointów
                 adjusted_x = int(kp.pt[0])
                 adjusted_y = int(kp.pt[1])
-
             print(f"Blob wykryty: {len(keypoints)} blobów.")
             return keypoints
 

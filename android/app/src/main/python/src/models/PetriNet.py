@@ -36,7 +36,7 @@ class PetriNet:
 
     def analyze(self):
         """
-        🔥 Tworzy `PetriNetAnalyzer`, analizuje sieć i zapisuje wyniki.
+        Tworzy `PetriNetAnalyzer`, analizuje sieć i zapisuje wyniki.
         """
         analyzer = PetriNetAnalyzer(copy.deepcopy(self))
         self.is_interrupted = analyzer.interrupted

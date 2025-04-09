@@ -12,7 +12,7 @@ bool isPointNearLine(Offset p, Offset start, Offset end, double tolerance) {
   // Obliczamy współczynnik t dla najkrótszej odległości od punktu p do linii
   double t =
       ((p.dx - start.dx) * dx + (p.dy - start.dy) * dy) / (dx * dx + dy * dy);
-  t = t.clamp(0, 1); // Ograniczamy t do przedziału <0,1>
+  t = t.clamp(0, 1);
 
   // Punkt na linii, który jest najbliżej kliknięcia
   Offset closestPoint = Offset(

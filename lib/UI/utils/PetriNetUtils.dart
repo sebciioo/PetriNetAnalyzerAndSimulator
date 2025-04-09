@@ -22,7 +22,6 @@ class PetriNetUtils {
   static States? detectState(Offset correctedPosition, PetriNet petriNetState) {
     for (final state in petriNetState.states) {
       if ((correctedPosition - state.center).distance < 45) {
-        print("Kliknalem w stan");
         return state;
       }
     }
@@ -34,7 +33,6 @@ class PetriNetUtils {
     for (final transition in petriNetState.transitions) {
       if (isPointNearLine(
           correctedPosition, transition.start, transition.end, 10)) {
-        print("Kliknalem w tranzycje");
         return transition;
       }
     }

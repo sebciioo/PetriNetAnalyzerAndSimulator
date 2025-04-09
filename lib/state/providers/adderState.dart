@@ -10,7 +10,7 @@ const _keepValue = Object();
 class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
   PetriNetAdderNotifier() : super(PetriNetElementAdder());
 
-  /// 🔥 Resetuje wybór i komunikat
+  ///Resetuje wybór i komunikat
   void resetSelection() {
     state = PetriNetElementAdder(
       startElement: null,
@@ -33,8 +33,7 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
       startElement:
           startElement == _keepValue ? state.startElement : startElement,
       endElement: endElement == _keepValue ? state.endElement : endElement,
-      selectionMessage:
-          selectionMessage ?? state.selectionMessage, // 🔥 Obsługa `String?`
+      selectionMessage: selectionMessage ?? state.selectionMessage,
     );
   }
 
@@ -50,7 +49,7 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
     }
   }
 
-  /// 🔥 Obsługa kliknięcia na ekranie (dodawanie stanu, tranzycji lub łuku)
+  ///Obsługa kliknięcia na ekranie (dodawanie stanu, tranzycji lub łuku)
   void addElement(TapDownDetails details, Matrix4 transformationControllerValue,
       PetriNet petriNetState, WidgetRef ref) {
     if (state.selectedElement == null) return;
@@ -61,7 +60,6 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
     if (state.selectedElement is States) {
       final newState = States(center: correctedPosition, tokens: 0);
       ref.read(petriNetProvider.notifier).addState(newState);
-      print("🟡 Dodano stan na pozycji: $correctedPosition");
       updateState(selectedElement: null, selectionMessage: '');
     } else if (state.selectedElement is Transition) {
       final newTransitionPositionStart =
@@ -71,9 +69,6 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
       final newTransition = Transition(
           start: newTransitionPositionStart, end: newTransitionPositionEnd);
       ref.read(petriNetProvider.notifier).addTransition(newTransition);
-      print(
-          "🟨 Dodano tranzycję na pozycji: $newTransitionPositionStart, $newTransitionPositionEnd");
-
       updateState(selectedElement: null, selectionMessage: '');
     } else if (state.selectedElement is Arc) {
       handleArcSelection(correctedPosition, petriNetState, ref);
@@ -89,9 +84,8 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
       if (selected != null) {
         updateState(
             startElement: selected, selectionMessage: "Kliknij drugi element");
-        print("✅ Wybrano pierwszy element: ${selected.label}");
       } else {
-        print("❌ Kliknięto w pustą przestrzeń.");
+        print("Kliknięto w pustą przestrzeń.");
       }
     } else if (state.endElement == null) {
       // Wybieramy drugi element (gdzie łuk ma dochodzić)
@@ -117,18 +111,18 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
         }
         createArc(ref);
       } else {
-        print("❌ Kliknięto w pustą przestrzeń.");
+        print("Kliknięto w pustą przestrzeń.");
       }
     }
   }
 
-  /// 🔍 Wykrywa kliknięty element (stan lub tranzycję)
+  ///Wykrywa kliknięty element (stan lub tranzycję)
   dynamic detectElement(Offset scenePosition, PetriNet petriNetState) {
     return PetriNetUtils.detectState(scenePosition, petriNetState) ??
         PetriNetUtils.detectTransition(scenePosition, petriNetState);
   }
 
-  /// 🔥 Tworzenie i dodawanie łuku
+  ///Tworzenie i dodawanie łuku
   void createArc(WidgetRef ref) {
     if (state.startElement != null && state.endElement != null) {
       final newArrow = Arc(
@@ -155,9 +149,6 @@ class PetriNetAdderNotifier extends StateNotifier<PetriNetElementAdder> {
       ref
           .read(petriNetProvider.notifier)
           .addArrow(newArrow, state.startElement, state.endElement);
-
-      print(
-          "➡ Dodano łuk od ${state.startElement.label} do ${state.endElement.label}");
 
       resetSelection();
     }

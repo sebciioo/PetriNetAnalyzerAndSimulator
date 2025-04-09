@@ -9,11 +9,11 @@ def find_contours(image):
 
 def find_line(image, circles, rho=1, threshold=80, minLength=55, maxGap=25):
     # Tworzenie maski, która zakrywa koła
-    mask = np.ones_like(image, dtype=np.uint8) * 255  # Biały obraz
+    mask = np.ones_like(image, dtype=np.uint8) * 255
     for circle in circles:
         cx, cy = circle.center
         r = circle.radius
-        cv2.circle(mask, (int(cx), int(cy)), int(r), (0, 0, 0), thickness=-1)  # Czarne koła
+        cv2.circle(mask, (int(cx), int(cy)), int(r), (0, 0, 0), thickness=-1)
 
     # Nałożenie maski na obraz
     masked_image = cv2.bitwise_and(image, mask)
@@ -133,7 +133,7 @@ def closest_point_on_line(px, py, x1, y1, x2, y2):
     """
     line_len = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     if line_len == 0:
-        return x1, y1  # Linia o zerowej długości
+        return x1, y1 
 
     # Wektor linii
     t = max(0, min(1, ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / (line_len ** 2)))
@@ -265,7 +265,8 @@ def detect_intersection(line1, line2):
 
     denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
     if denom == 0:
-        return None  # Linie są równoległe
+        # Linie są równoległe
+        return None  
 
     px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom
     py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom
@@ -276,7 +277,7 @@ def detect_intersection(line1, line2):
     if not (min(x3, x4) <= px <= max(x3, x4) and min(y3, y4) <= py <= max(y3, y4)):
         return None
 
-    return int(px), int(py)  # Zwracamy współrzędne punktu przecięcia
+    return int(px), int(py)
 
 
 def is_line_near_circle(circle, line, radius_threshold=80):
@@ -501,7 +502,6 @@ def closest_point_on_circle(px, py, cx, cy, r, image):
     scaled_vector = vector * (r / vector_length)
     closest_x = cx + scaled_vector[0]
     closest_y = cy + scaled_vector[1]
-    #cv2.circle(image, (int(closest_x), int(closest_y)), 20, (255, 0, 255), -1)
     return int(closest_x), int(closest_y)
 
 

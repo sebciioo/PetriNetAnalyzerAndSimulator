@@ -33,11 +33,11 @@ class AddSubtractTokensToState extends ConsumerWidget {
           left: transformedPosition.dx - (buttonSize * 2.5) / 2,
           child: DeferPointer(
             child: Container(
-              width: buttonSize * 2.5, // Szerokość dwóch przycisków obok siebie
+              width: buttonSize * 2.5,
               height: buttonSize,
               decoration: BoxDecoration(
                 color: Colors.blue.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(25.0), // Zaokrąglone rogi
+                borderRadius: BorderRadius.circular(25.0),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -56,8 +56,7 @@ class AddSubtractTokensToState extends ConsumerWidget {
                         ),
                       ),
                       child: const Icon(
-                        Icons
-                            .remove_circle_outline, // Ikona do odejmowania tokenu
+                        Icons.remove_circle_outline,
                         size: 25,
                         color: Colors.white,
                       ),
@@ -77,7 +76,7 @@ class AddSubtractTokensToState extends ConsumerWidget {
                         ),
                       ),
                       child: const Icon(
-                        Icons.add_circle_outline, // Ikona do dodawania tokenu
+                        Icons.add_circle_outline,
                         size: 25,
                         color: Colors.white,
                       ),
