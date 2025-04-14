@@ -428,9 +428,7 @@ class PetriNetScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.center, // Wyśrodkowanie
-
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               modeState.simulationMode
@@ -442,24 +440,22 @@ class PetriNetScreen extends ConsumerWidget {
                                 color: Theme.of(context).colorScheme.scrim,
                               ),
                             ),
-                            SizedBox(width: 5), // Odstęp między tekstem a ikoną
+                            SizedBox(width: 5),
                             Icon(
                               modeState.simulationMode
                                   ? Icons.play_circle_fill
-                                  : Icons.edit, // Zmiana ikony
+                                  : Icons.edit,
                               color: Colors.black,
-                              size: 22, // Rozmiar ikony
+                              size: 22,
                             ),
                           ],
                         ),
                         SizedBox(height: 5),
                         Switch(
                           value: modeState.simulationMode,
-                          activeColor: Colors.white, // Kolor kółka
-                          activeTrackColor:
-                              Color(0xFF0077B6), // Kolor toru włączonego
-                          inactiveTrackColor:
-                              Colors.grey[400], // Kolor toru wyłączonego
+                          activeColor: Colors.white,
+                          activeTrackColor: Color(0xFF0077B6),
+                          inactiveTrackColor: Colors.grey[400],
                           onChanged: (bool value) {
                             if (value) {
                               onTapSimulationButton();

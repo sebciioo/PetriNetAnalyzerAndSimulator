@@ -421,7 +421,7 @@ def filter_lines(lines, distance_threshold=50, angle_threshold=20, min_length=20
             # Oblicz dystanse między końcami linii
             dist_start = np.sqrt((x1 - fx1) ** 2 + (y1 - fy1) ** 2)
             dist_end = np.sqrt((x2 - fx2) ** 2 + (y2 - fy2) ** 2)
-            # Oblicz dystanse dla odwróconych końców linii (x1, y1)-(x2, y2) vs (fx2, fy2)-(fx1, fy1)
+            # Oblicz dystanse dla odwróconych końców linii 
             dist_reverse_start = np.sqrt((x1 - fx2) ** 2 + (y1 - fy2) ** 2)
             dist_reverse_end = np.sqrt((x2 - fx1) ** 2 + (y2 - fy1) ** 2)
             # Jeśli kąty są podobne i końce (w dowolnej kolejności) są wystarczająco blisko siebie

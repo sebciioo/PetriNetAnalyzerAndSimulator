@@ -49,7 +49,6 @@ class State:
             arc (Arc): Łuk, który ma być sprawdzony i przypisany.
             distance_threshold (int): Maksymalna odległość od stanu do końca łuku.
         """
-        # Wymuszenie typu float dla współrzędnych
         if arc.arrow_position == "start":
             arrowhead_x, arrowhead_y = map(float, arc.start)
             end_x, end_y = map(float, arc.end)

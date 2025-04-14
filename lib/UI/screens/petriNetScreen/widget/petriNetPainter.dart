@@ -6,8 +6,8 @@ import 'package:arrow_path/arrow_path.dart';
 
 class PetriNetPainter extends CustomPainter {
   final PetriNet petriNet;
-  final double transitionHeight = 70.0; // Stała wysokość tranzycji
-  final double transitionWidth = 5.0; // Szerokość tranzycji
+  final double transitionHeight = 70.0;
+  final double transitionWidth = 5.0;
   final double constStateRadius = 40;
 
   PetriNetPainter({required this.petriNet});
@@ -45,7 +45,6 @@ class PetriNetPainter extends CustomPainter {
         );
       }
 
-      // Rysowanie tokenów
       // Rysowanie tokenów
       if (state.tokens > 0) {
         if (state.tokens <= 3) {

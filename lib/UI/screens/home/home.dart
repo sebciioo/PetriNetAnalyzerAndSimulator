@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Container(
-                  child: Text(""), // Pusty tekst jako placeholder
+                  child: Text(""),
                 ),
               ),
             ],

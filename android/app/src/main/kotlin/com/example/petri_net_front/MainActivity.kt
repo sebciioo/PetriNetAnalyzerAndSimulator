@@ -25,7 +25,7 @@ class MainActivity : FlutterActivity() {
                     try {
                         val py = Python.getInstance()
                         val pyModule = py.getModule("main") 
-                        pyModule.callAttr("main") // Wywołanie funkcji start_server
+                        pyModule.callAttr("main") 
                         result.success("Serwer Flask został uruchomiony.")
                     } catch (e: Exception) {
                         result.error("error", "Błąd uruchamiania serwera Flask", e.message)

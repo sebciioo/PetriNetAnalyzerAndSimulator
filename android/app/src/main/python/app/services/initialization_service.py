@@ -35,8 +35,8 @@ class InitializationService:
         """
         Konwertuje obraz OpenCV (numpy array) na Base64.
         """
-        _, buffer = cv2.imencode('.png', self.image)  # Kodowanie do formatu PNG
-        return base64.b64encode(buffer).decode('utf-8')  # Konwersja na Base64
+        _, buffer = cv2.imencode('.png', self.image)  
+        return base64.b64encode(buffer).decode('utf-8')  
 
 
     def detect_states(self):

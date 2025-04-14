@@ -94,7 +94,6 @@ class Transition:
 
             min_distance = min(distances)
             if min_distance <= threshold:
-                # Dodaj łuk w zależności od tego, który punkt jest bliżej
                 if distances[0] < distances[1]:
                     arc.start_transition = transition.label
                     self.incoming_arcs.append(arc)

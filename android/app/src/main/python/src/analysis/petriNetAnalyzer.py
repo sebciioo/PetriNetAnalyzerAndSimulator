@@ -141,9 +141,6 @@ class PetriNetAnalyzer:
                 transition = out_arc.start_transition
                 for in_arc in state.incoming_arcs:
                     if in_arc.start_transition == transition:
-                        # Mamy self-loop: stan -> tranzycja -> ten sam stan
-                        print(state)
-                        print(transition)
                         return False
         return True
 
