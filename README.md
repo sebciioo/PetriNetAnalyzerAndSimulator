@@ -1,4 +1,16 @@
-# PetriMind
+# PetriMind - simulator and analyzer of Petri Nets
+
+![Logo](1.PNG)
+
+![Petri Net Recognition](2.PNG)
+
+**EN 🇬🇧**
+PetriMind is an innovative mobile application designed to aid in the analysis, simulation, and understanding of Petri nets. It combines computer vision techniques, advanced algorithms, and an intuitive user interface to provide a seamless experience for students, researchers, and professionals working with Petri nets.
+
+**PL 🇵🇱**
+PetriMind to innowacyjna aplikacja mobilna, która ma pomóc w analizie, symulacji i zrozumieniu sieci Petriego. Łączy techniki przetwarzania obrazu, zaawansowane algorytmy i intuicyjny interfejs użytkownika, zapewniając studentom, badaczom i specjalistom pracującym z sieciami Petriego bezproblemowe korzystanie z nich.
+
+---
 
 **PL 🇵🇱**: Symuluj, analizuj – zrozum sieci Petriego  
 **EN 🇬🇧**: Simulate, analyze – understand Petri nets
